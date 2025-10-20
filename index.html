@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音接水果小游戏</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏开始界面 -->
+        <div class="start-screen" id="startScreen">
+            <div class="game-title">
+                <h1>🍎 接水果大作战 🍌</h1>
+                <p>点击屏幕开始游戏！</p>
+                <div class="start-btn" id="startBtn">开始游戏</div>
+            </div>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div class="game-screen" id="gameScreen" style="display: none;">
+            <!-- 游戏信息栏 -->
+            <div class="game-info">
+                <div class="score">得分: <span id="score">0</span></div>
+                <div class="lives">生命: <span id="lives">3</span></div>
+                <div class="level">关卡: <span id="level">1</span></div>
+            </div>
+
+            <!-- 游戏画布 -->
+            <div class="game-canvas" id="gameCanvas">
+                <!-- 篮子 -->
+                <div class="basket" id="basket"></div>
+                
+                <!-- 水果容器 -->
+                <div class="fruits-container" id="fruitsContainer"></div>
+                
+                <!-- 粒子效果容器 -->
+                <div class="particles-container" id="particlesContainer"></div>
+            </div>
+
+            <!-- 暂停按钮 -->
+            <div class="pause-btn" id="pauseBtn">⏸️</div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div class="game-over-screen" id="gameOverScreen" style="display: none;">
+            <div class="game-over-content">
+                <h2>游戏结束！</h2>
+                <div class="final-score">最终得分: <span id="finalScore">0</span></div>
+                <div class="final-level">到达关卡: <span id="finalLevel">1</span></div>
+                <div class="restart-btn" id="restartBtn">重新开始</div>
+            </div>
+        </div>
+
+        <!-- 暂停界面 -->
+        <div class="pause-screen" id="pauseScreen" style="display: none;">
+            <div class="pause-content">
+                <h2>游戏暂停</h2>
+                <div class="resume-btn" id="resumeBtn">继续游戏</div>
+                <div class="restart-btn" id="restartBtn2">重新开始</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
