@@ -1,0 +1,334 @@
+/* 基础样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.game-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 开始界面样式 */
+.start-screen {
+    text-align: center;
+    color: white;
+    z-index: 10;
+}
+
+.game-title h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    animation: bounce 2s infinite;
+}
+
+.game-title p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+}
+
+.start-btn, .restart-btn, .resume-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin: 10px;
+}
+
+.start-btn:hover, .restart-btn:hover, .resume-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* 游戏界面样式 */
+.game-screen {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.game-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 5;
+}
+
+.game-canvas {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+    overflow: hidden;
+}
+
+/* 篮子样式 */
+.basket {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 60px;
+    background: linear-gradient(45deg, #8B4513, #A0522D);
+    border-radius: 0 0 60px 60px;
+    border: 3px solid #654321;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.1s ease;
+    z-index: 3;
+}
+
+.basket::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    right: 10px;
+    height: 10px;
+    background: linear-gradient(45deg, #654321, #8B4513);
+    border-radius: 5px;
+}
+
+/* 水果样式 */
+.fruit {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    animation: fall linear;
+    z-index: 2;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.fruit:hover {
+    transform: scale(1.1);
+}
+
+/* 不同类型的水果 */
+.fruit.apple {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+}
+
+.fruit.banana {
+    background: linear-gradient(45deg, #feca57, #ff9ff3);
+    box-shadow: 0 2px 8px rgba(254, 202, 87, 0.4);
+}
+
+.fruit.orange {
+    background: linear-gradient(45deg, #ff9f43, #ff6348);
+    box-shadow: 0 2px 8px rgba(255, 159, 67, 0.4);
+}
+
+.fruit.grape {
+    background: linear-gradient(45deg, #a55eea, #8e44ad);
+    box-shadow: 0 2px 8px rgba(165, 94, 234, 0.4);
+}
+
+.fruit.strawberry {
+    background: linear-gradient(45deg, #ff3838, #ff6b6b);
+    box-shadow: 0 2px 8px rgba(255, 56, 56, 0.4);
+}
+
+/* 水果下落动画 */
+@keyframes fall {
+    from {
+        transform: translateY(-100px) rotate(0deg);
+    }
+    to {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+/* 粒子效果 */
+.particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #ffd700;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particle-fade 1s ease-out forwards;
+}
+
+@keyframes particle-fade {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) translateY(-50px);
+    }
+}
+
+/* 暂停按钮 */
+.pause-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 5;
+}
+
+.pause-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* 游戏结束界面 */
+.game-over-screen, .pause-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.game-over-content, .pause-content {
+    text-align: center;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-over-content h2, .pause-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.final-score, .final-level {
+    font-size: 1.5rem;
+    margin: 10px 0;
+    color: #ffd700;
+}
+
+/* 动画效果 */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .game-title h1 {
+        font-size: 2rem;
+    }
+    
+    .game-info {
+        font-size: 1rem;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+    }
+    
+    .basket {
+        width: 100px;
+        height: 50px;
+    }
+    
+    .fruit {
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+    }
+    
+    .start-btn, .restart-btn, .resume-btn {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+}
+
+/* 触摸反馈 */
+.touch-feedback {
+    animation: touch-pulse 0.3s ease;
+}
+
+@keyframes touch-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 得分动画 */
+.score-pop {
+    animation: score-pop 0.5s ease;
+}
+
+@keyframes score-pop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        color: #ffd700;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
