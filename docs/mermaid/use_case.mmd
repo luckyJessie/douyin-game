@@ -2,30 +2,47 @@ graph LR
     actorStudent([学生])
     actorTeacher([教师])
     actorAdmin([管理员])
+    actorSupport([技术支持])
 
     subgraph 用例
         UC1((登录认证))
-        UC2((加入课程))
-        UC3((提交作业))
-        UC4((查看反馈))
-        UC5((布置作业))
-        UC6((批阅评分))
-        UC7((发布通知))
-        UC8((管理用户))
-        UC9((导出报表))
+        UC2((查看课程与公告))
+        UC3((加入课程/退课申请))
+        UC4((提交作业/版本管理))
+        UC5((查看反馈与成绩单))
+        UC6((参与讨论与FAQ检索))
+        UC7((布置作业与Rubric))
+        UC8((批阅评分与批注))
+        UC9((发布通知与群发消息))
+        UC10((构建课程资源库))
+        UC11((导出成绩/分析报表))
+        UC12((管理用户与角色权限))
+        UC13((配置迟交策略与提醒频率))
+        UC14((监控系统与处理告警))
     end
 
     actorStudent --> UC1
     actorStudent --> UC2
     actorStudent --> UC3
     actorStudent --> UC4
+    actorStudent --> UC5
+    actorStudent --> UC6
 
     actorTeacher --> UC1
-    actorTeacher --> UC5
-    actorTeacher --> UC6
+    actorTeacher --> UC2
     actorTeacher --> UC7
+    actorTeacher --> UC8
     actorTeacher --> UC9
+    actorTeacher --> UC10
+    actorTeacher --> UC11
+    actorTeacher --> UC13
 
     actorAdmin --> UC1
-    actorAdmin --> UC8
-    actorAdmin --> UC7
+    actorAdmin --> UC2
+    actorAdmin --> UC9
+    actorAdmin --> UC11
+    actorAdmin --> UC12
+    actorAdmin --> UC13
+    actorAdmin --> UC14
+
+    actorSupport --> UC14

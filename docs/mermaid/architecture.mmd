@@ -1,18 +1,67 @@
 graph LR
-    Browser[Web / Mobile 浏览器] --> CDN --> Ingress
-    Ingress --> Gateway[API 网关]
-    Gateway --> AuthSvc[认证服务]
-    Gateway --> CourseSvc[课程服务]
-    Gateway --> AssignmentSvc[作业服务]
-    Gateway --> AnalyticsSvc[分析服务]
-    Gateway --> NotificationSvc[通知服务]
-    AuthSvc --> Redis[(Redis 会话)]
-    CourseSvc --> Postgres[(PostgreSQL)]
+    subgraph Client[终端]
+        Browser[Web 浏览器]
+        Mobile[移动端 H5]
+    end
+
+    Browser & Mobile --> CDN[CDN/静态资源分发]
+    CDN --> WAF[WAF 安全防护]
+    WAF --> Ingress[Ingress Controller]
+
+    subgraph Platform[平台层]
+        Ingress --> Gateway[API 网关]
+        Gateway --> AuthSvc[认证服务]
+        Gateway --> CourseSvc[课程服务]
+        Gateway --> AssignmentSvc[作业服务]
+        Gateway --> ResourceSvc[资源服务]
+        Gateway --> AnalyticsSvc[分析服务]
+        Gateway --> NotificationSvc[通知服务]
+        Gateway --> OpsSvc[运维监控服务]
+    end
+
+    subgraph Infra[基础设施]
+        Postgres[(PostgreSQL 集群)]
+        Redis[(Redis 集群)]
+        MQ[(RabbitMQ 队列)]
+        ObjStore[(对象存储 MinIO)]
+        ES[(Elasticsearch 审计库)]
+        DW[(数据仓库/统计视图)]
+        Config[(配置中心 Config Server)]
+    end
+
+    AuthSvc --> Redis
+    AuthSvc --> SSO[学校统一身份认证]
+    SSO --> AuthSvc
+    CourseSvc --> Postgres
     AssignmentSvc --> Postgres
-    AnalyticsSvc --> DW[(统计视图)]
-    NotificationSvc --> MQ[(RabbitMQ)]
+    ResourceSvc --> ObjStore
+    ResourceSvc --> Postgres
+    ResourceSvc --> MQ
+    NotificationSvc --> MQ
     MQ --> NotificationWorker[通知 Worker]
-    AssignmentSvc --> ES[(Elasticsearch 审计日志)]
+    NotificationWorker --> Mail[邮件服务]
+    NotificationWorker --> WeCom[企业微信]
+    NotificationWorker --> Inbox[站内信]
+
+    AssignmentSvc --> ES
+    OpsSvc --> ES
+    AnalyticsSvc --> DW
+    DW --> AnalyticsSvc
+
+    Config --> AuthSvc & CourseSvc & AssignmentSvc & ResourceSvc & NotificationSvc & AnalyticsSvc & OpsSvc
+
+    subgraph Observability[可观测性]
+        Prometheus[(Prometheus)]
+        Loki[(日志收集 Loki)]
+        Grafana[(Grafana)]
+    end
+
     Prometheus -->|采集| Gateway
-    Prometheus -->|采集| Services[各业务服务]
+    Prometheus -->|采集| CourseSvc
+    Prometheus -->|采集| AssignmentSvc
+    Prometheus -->|采集| NotificationSvc
+    Loki --> ES
+    OpsSvc --> Prometheus
+    OpsSvc --> Loki
     Grafana --> Prometheus
+    Grafana --> Loki

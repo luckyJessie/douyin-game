@@ -1,19 +1,30 @@
 sequenceDiagram
     participant Teacher
     participant Frontend
-    participant Gateway
-    participant ResourceSvc
-    participant Storage
-    participant PreviewWorker
+    participant 网关
+    participant 资源服务
+    participant 对象存储
+    participant 病毒扫描
+    participant 预览任务
+    participant 索引服务
 
-    Teacher->>Frontend: 选择文件上传
-    Frontend->>Gateway: POST /resources
-    Gateway->>ResourceSvc: 校验权限
-    ResourceSvc->>Storage: 上传对象
-    Storage-->>ResourceSvc: 返回存储 URL
-    ResourceSvc->>ResourceSvc: 新建资源版本
-    ResourceSvc->>PreviewWorker: 发布生成预览任务
-    PreviewWorker->>Storage: 拉取原始文件
-    PreviewWorker-->>Storage: 上传预览文件
-    PreviewWorker->>ResourceSvc: 更新预览状态
-    ResourceSvc-->>Teacher: 上传成功
+    Teacher->>Frontend: 选择文件并填写元数据
+    Frontend->>网关: 请求上传凭证
+    网关->>资源服务: 校验课程权限
+    资源服务-->>网关: 返回预签名 URL
+    网关-->>Frontend: 上传凭证
+    Frontend->>对象存储: 分片上传文件
+    对象存储-->>Frontend: 上传完成回执
+    Frontend->>网关: POST /resources 完成上传
+    网关->>资源服务: 写入资源信息
+    资源服务->>病毒扫描: 触发异步扫描
+    病毒扫描->>对象存储: 读取文件
+    病毒扫描-->>资源服务: 返回安全结果
+    资源服务->>资源服务: 创建资源版本 & 校验哈希
+    资源服务->>预览任务: 发布生成预览消息
+    预览任务->>对象存储: 拉取原始文件
+    预览任务-->>对象存储: 上传预览图片/PDF
+    预览任务->>资源服务: 更新预览状态
+    资源服务->>索引服务: 更新搜索索引/标签
+    索引服务-->>资源服务: 返回成功
+    资源服务-->>Teacher: 上传完成并显示预览链接
