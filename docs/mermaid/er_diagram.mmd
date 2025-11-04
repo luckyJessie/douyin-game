@@ -1,0 +1,24 @@
+erDiagram
+    USER ||--o{ USER_ROLE : "拥有"
+    ROLE ||--o{ USER_ROLE : "包含"
+    ROLE ||--o{ ROLE_PERMISSION : "授予"
+    PERMISSION ||--o{ ROLE_PERMISSION : "被授予"
+
+    COURSE ||--o{ COURSE_MEMBER : "拥有成员"
+    USER ||--o{ COURSE_MEMBER : "参与课程"
+    COURSE ||--o{ RESOURCE : "包含资源"
+    RESOURCE ||--|| RESOURCE_VERSION : "版本"
+
+    COURSE ||--o{ ASSIGNMENT : "布置作业"
+    ASSIGNMENT ||--o{ SUBMISSION : "接收提交"
+    USER ||--o{ SUBMISSION : "提交"
+    SUBMISSION ||--o{ REVIEW : "关联批阅"
+    USER ||--o{ REVIEW : "批阅"
+
+    ASSIGNMENT ||--o{ LATE_POLICY : "配置策略"
+    COURSE ||--o{ NOTICE : "通知"
+
+    SUBMISSION ||--o{ SUBMISSION_FILE : "附件"
+    RESOURCE_VERSION ||--o{ PREVIEW : "预览文件"
+
+    COURSE ||--o{ DASHBOARD_METRIC : "生成指标"

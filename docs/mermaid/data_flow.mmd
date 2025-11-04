@@ -1,0 +1,31 @@
+graph TD
+    Student[学生]
+    Teacher[教师]
+    Admin[管理员]
+
+    subgraph 系统边界
+        AssignmentDB[(作业数据库)]
+        CourseDB[(课程数据库)]
+        Analytics[(分析引擎)]
+        Notification[(通知服务)]
+        AuthService[(认证服务)]
+    end
+
+    Student -->|登录信息| AuthService
+    Teacher -->|登录信息| AuthService
+    Admin -->|登录信息| AuthService
+    AuthService -->|认证结果| Student
+    AuthService -->|认证结果| Teacher
+    AuthService -->|认证结果| Admin
+
+    Teacher -->|课程创建/资源上传| CourseDB
+    Student -->|作业提交| AssignmentDB
+    Teacher -->|批阅结果| AssignmentDB
+    AssignmentDB -->|作业状态| Notification
+    Notification -->|提醒| Student
+    Notification -->|提醒| Teacher
+
+    AssignmentDB -->|原始数据| Analytics
+    CourseDB -->|课程信息| Analytics
+    Analytics -->|统计报表| Teacher
+    Analytics -->|统计报表| Admin

@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Teacher
+    participant Frontend
+    participant Gateway
+    participant ResourceSvc
+    participant Storage
+    participant PreviewWorker
+
+    Teacher->>Frontend: 选择文件上传
+    Frontend->>Gateway: POST /resources
+    Gateway->>ResourceSvc: 校验权限
+    ResourceSvc->>Storage: 上传对象
+    Storage-->>ResourceSvc: 返回存储 URL
+    ResourceSvc->>ResourceSvc: 新建资源版本
+    ResourceSvc->>PreviewWorker: 发布生成预览任务
+    PreviewWorker->>Storage: 拉取原始文件
+    PreviewWorker-->>Storage: 上传预览文件
+    PreviewWorker->>ResourceSvc: 更新预览状态
+    ResourceSvc-->>Teacher: 上传成功

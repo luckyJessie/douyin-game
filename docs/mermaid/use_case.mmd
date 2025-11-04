@@ -1,0 +1,31 @@
+graph LR
+    actorStudent([学生])
+    actorTeacher([教师])
+    actorAdmin([管理员])
+
+    subgraph 用例
+        UC1((登录认证))
+        UC2((加入课程))
+        UC3((提交作业))
+        UC4((查看反馈))
+        UC5((布置作业))
+        UC6((批阅评分))
+        UC7((发布通知))
+        UC8((管理用户))
+        UC9((导出报表))
+    end
+
+    actorStudent --> UC1
+    actorStudent --> UC2
+    actorStudent --> UC3
+    actorStudent --> UC4
+
+    actorTeacher --> UC1
+    actorTeacher --> UC5
+    actorTeacher --> UC6
+    actorTeacher --> UC7
+    actorTeacher --> UC9
+
+    actorAdmin --> UC1
+    actorAdmin --> UC8
+    actorAdmin --> UC7

@@ -1,0 +1,12 @@
+flowchart TD
+    A[提交时间校验] --> B{deadline 内}
+    B -- 是 --> C[正常提交]
+    B -- 否 --> D[计算延迟时长]
+    D --> E{适用策略}
+    E -->|FixedPenalty| F[扣固定分]
+    E -->|PercentPenalty| G[按比例扣分]
+    E -->|NoPenalty| H[教师审核决定]
+    F --> I[记录扣分结果]
+    G --> I
+    H --> I
+    I --> J[更新成绩单]

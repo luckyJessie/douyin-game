@@ -1,0 +1,18 @@
+graph LR
+    Browser[Web / Mobile 浏览器] --> CDN --> Ingress
+    Ingress --> Gateway[API 网关]
+    Gateway --> AuthSvc[认证服务]
+    Gateway --> CourseSvc[课程服务]
+    Gateway --> AssignmentSvc[作业服务]
+    Gateway --> AnalyticsSvc[分析服务]
+    Gateway --> NotificationSvc[通知服务]
+    AuthSvc --> Redis[(Redis 会话)]
+    CourseSvc --> Postgres[(PostgreSQL)]
+    AssignmentSvc --> Postgres
+    AnalyticsSvc --> DW[(统计视图)]
+    NotificationSvc --> MQ[(RabbitMQ)]
+    MQ --> NotificationWorker[通知 Worker]
+    AssignmentSvc --> ES[(Elasticsearch 审计日志)]
+    Prometheus -->|采集| Gateway
+    Prometheus -->|采集| Services[各业务服务]
+    Grafana --> Prometheus
