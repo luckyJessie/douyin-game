@@ -1,0 +1,42 @@
+erDiagram
+    USER ||--o{ USER_ROLE : "拥有"
+    ROLE ||--o{ USER_ROLE : "包含"
+    ROLE ||--o{ ROLE_PERMISSION : "授予"
+    PERMISSION ||--o{ ROLE_PERMISSION : "被授予"
+
+    COURSE ||--o{ COURSE_MEMBER : "拥有成员"
+    USER ||--o{ COURSE_MEMBER : "参与课程"
+    COURSE ||--o{ RESOURCE : "包含资源"
+    RESOURCE ||--|| RESOURCE_VERSION : "版本"
+
+    COURSE ||--o{ ASSIGNMENT : "布置作业"
+    ASSIGNMENT ||--o{ SUBMISSION : "接收提交"
+    USER ||--o{ SUBMISSION : "提交"
+    SUBMISSION ||--o{ REVIEW : "关联批阅"
+    USER ||--o{ REVIEW : "批阅"
+
+    ASSIGNMENT ||--o{ LATE_POLICY : "配置策略"
+    COURSE ||--o{ NOTICE : "通知"
+
+    SUBMISSION ||--o{ SUBMISSION_FILE : "附件"
+    RESOURCE_VERSION ||--o{ PREVIEW : "预览文件"
+
+    ASSIGNMENT ||--o{ RUBRIC_ITEM : "评分维度"
+    RUBRIC_ITEM ||--o{ RUBRIC_SCORE : "评分结果"
+    REVIEW ||--o{ RUBRIC_SCORE : "引用得分"
+
+    COURSE ||--o{ DASHBOARD_METRIC : "生成指标"
+    USER ||--o{ STUDENT_METRIC : "拥有指标"
+    COURSE ||--o{ STUDENT_METRIC : "指标来源"
+
+    COURSE ||--o{ DISCUSSION_TOPIC : "讨论话题"
+    USER ||--o{ DISCUSSION_POST : "发表帖子"
+    DISCUSSION_TOPIC ||--o{ DISCUSSION_POST : "包含帖子"
+
+    FAQ_ENTRY ||--o{ FAQ_TAG : "关联标签"
+    COURSE ||--o{ FAQ_ENTRY : "维护 FAQ"
+
+    NOTICE ||--o{ NOTICE_CHANNEL : "发送渠道记录"
+
+    USER ||--o{ AUDIT_LOG : "操作日志"
+    COURSE ||--o{ AUDIT_LOG : "关联课程"

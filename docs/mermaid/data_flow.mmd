@@ -1,0 +1,52 @@
+graph TD
+    Student[学生]
+    Teacher[教师]
+    Admin[管理员]
+    Support[技术支持]
+
+    subgraph 系统边界
+        AuthService[(认证服务)]
+        CourseDB[(课程数据库)]
+        AssignmentDB[(作业与提交库)]
+        ResourceStore[(对象存储)]
+        Notification[(通知服务)]
+        Analytics[(分析与指标引擎)]
+        Audit[(审计日志 ES)]
+        Config[(配置中心)]
+    end
+
+    Student -->|登录凭证| AuthService
+    Teacher -->|登录凭证| AuthService
+    Admin -->|登录凭证| AuthService
+    AuthService -->|JWT & 角色| Student
+    AuthService -->|JWT & 角色| Teacher
+    AuthService -->|JWT & 角色| Admin
+
+    Teacher -->|创建课程/公告| CourseDB
+    Admin -->|审批课程/成员| CourseDB
+    Teacher -->|上传资源元数据| CourseDB
+    Teacher -->|文件上传| ResourceStore
+    Student -->|下载资源| ResourceStore
+
+    Student -->|作业提交| AssignmentDB
+    AssignmentDB -->|附件引用| ResourceStore
+    Teacher -->|批阅评分| AssignmentDB
+    AssignmentDB -->|批阅结果| Student
+    AssignmentDB -->|状态变更事件| Notification
+    Notification -->|站内信/邮件/企业微信| Student
+    Notification -->|教学提醒| Teacher
+
+    AssignmentDB -->|提交数据| Analytics
+    CourseDB -->|课程结构/成员| Analytics
+    ResourceStore -->|访问日志| Analytics
+    Analytics -->|仪表盘| Teacher
+    Analytics -->|报表导出| Admin
+
+    AuthService -->|安全事件| Audit
+    AssignmentDB -->|操作轨迹| Audit
+    Support -->|查看告警| Notification
+    Support -->|审计查询| Audit
+
+    Config --> AuthService
+    Config --> Notification
+    Config --> Analytics
