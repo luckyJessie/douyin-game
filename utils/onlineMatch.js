@@ -38,7 +38,9 @@ export default class OnlineMatch {
     try {
       this.socketTask = wx.connectSocket({ url });
     } catch (error) {
-      this._rejectConnect?.(error);
+      if (this._rejectConnect) {
+        this._rejectConnect(error);
+      }
       this._resolveConnect = null;
       this._rejectConnect = null;
       this.connectPromise = null;
@@ -88,7 +90,8 @@ export default class OnlineMatch {
     });
 
     this.socketTask.onMessage(event => {
-      this.handleMessage(event?.data);
+      const data = event && Object.prototype.hasOwnProperty.call(event, 'data') ? event.data : null;
+      this.handleMessage(data);
     });
   }
 

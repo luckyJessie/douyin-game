@@ -123,7 +123,9 @@ Page({
 
   handleModeChange(event) {
     const modeIndex = Number(event.detail.value);
-    const { value } = this.data.modeOptions[modeIndex];
+    const modeOptions = this.data.modeOptions || [];
+    const selectedMode = modeOptions[modeIndex] || modeOptions[0] || { value: this.data.mode };
+    const value = selectedMode.value;
     if (value === this.data.mode) return;
 
     if (value !== MODE.ONLINE) {
@@ -174,7 +176,8 @@ Page({
         this.isMyTurn = false;
       },
       onError: err => {
-        this.setOnlineStatus('error', err?.message || '连接异常');
+        const errorMessage = err && err.message ? err.message : '连接异常';
+        this.setOnlineStatus('error', errorMessage);
         this.isMyTurn = false;
       },
       onMessage: payload => {
@@ -206,7 +209,8 @@ Page({
     this.onlineMatch
       .connect(roomId)
       .catch(error => {
-        this.setOnlineStatus('error', error?.message || '无法连接服务器');
+        const errorMessage = error && error.message ? error.message : '无法连接服务器';
+        this.setOnlineStatus('error', errorMessage);
       });
   },
 
@@ -224,9 +228,13 @@ Page({
   },
 
   handleOnlineMessage(message) {
-    switch (message?.type) {
+    const messageType = message && message.type ? message.type : '';
+    switch (messageType) {
       case 'joined': {
-        const { roomId, stone, first } = message.payload || {};
+        const joinedPayload = message && message.payload ? message.payload : {};
+        const roomId = joinedPayload.roomId;
+        const stone = joinedPayload.stone;
+        const first = joinedPayload.first;
         this.myStone = stone === AI ? AI : HUMAN;
         this.onlineFirstStone = first === AI ? AI : HUMAN;
         this.isMyTurn = this.myStone === this.onlineFirstStone;
@@ -235,15 +243,19 @@ Page({
         break;
       }
       case 'start': {
-        this.isMyTurn = message.payload?.turn === 'self';
+        const startPayload = message && message.payload ? message.payload : {};
+        this.isMyTurn = startPayload.turn === 'self';
         this.onlineFirstStone = this.isMyTurn ? this.myStone : -this.myStone;
         this.setData({ message: this.isMyTurn ? '对局开始，轮到你落子' : '对局开始，等待对手落子' });
         break;
       }
       case 'move': {
-        const { x, y, player } = message.payload || {};
+        const movePayload = message && message.payload ? message.payload : {};
+        const x = movePayload.x;
+        const y = movePayload.y;
+        const movePlayer = typeof movePayload.player === 'number' ? movePayload.player : -this.myStone;
         if (typeof x === 'number' && typeof y === 'number') {
-          this.processMove(x, y, player || -this.myStone, { source: 'online' });
+          this.processMove(x, y, movePlayer, { source: 'online' });
           this.isMyTurn = true;
           if (!this.data.gameOver) {
             this.setData({ message: '轮到你落子' });
@@ -257,7 +269,9 @@ Page({
         break;
       }
       case 'error': {
-        this.setOnlineStatus('error', message.payload?.message || '服务器错误');
+        const errorPayload = message && message.payload ? message.payload : {};
+        const errorText = errorPayload.message || '服务器错误';
+        this.setOnlineStatus('error', errorText);
         break;
       }
       default:
@@ -268,7 +282,8 @@ Page({
   handleTouch(event) {
     if (this.data.gameOver || this.data.historyVisible || this.data.replaying) return;
 
-    const touch = event.changedTouches?.[0];
+    const touches = event && event.changedTouches ? event.changedTouches : [];
+    const touch = touches[0];
     if (!touch) return;
 
     const { padding, cellSize, boardSize } = this.data;
@@ -350,7 +365,9 @@ Page({
       this.setData({ message: nextPlayer === HUMAN ? '轮到黑棋落子' : '轮到白棋落子' });
     } else if (mode === MODE.ONLINE) {
       if (options.source === 'online-self') {
-        this.onlineMatch?.sendMove({ x, y, player });
+        if (this.onlineMatch) {
+          this.onlineMatch.sendMove({ x, y, player });
+        }
         this.isMyTurn = false;
         this.setData({ message: '已落子，等待对手应手' });
       } else if (options.source === 'online') {
@@ -414,10 +431,10 @@ Page({
     }
     this.savedState = {
       board: this.cloneBoard(this.board),
-      lastMove: this.lastMove ? { ...this.lastMove } : null,
+      lastMove: this.cloneMove(this.lastMove),
       message: this.data.message,
       gameOver: this.data.gameOver,
-      redoStack: [...this.redoStack],
+      redoStack: this.redoStack.slice(),
       historyLength: this.history.length,
       boardSnapshotsLength: this.boardSnapshots.length
     };
@@ -429,8 +446,8 @@ Page({
     this.replayIndex = null;
     if (this.savedState) {
       this.applySnapshot(this.savedState.board);
-      this.lastMove = this.savedState.lastMove;
-      this.redoStack = this.savedState.redoStack || [];
+      this.lastMove = this.cloneMove(this.savedState.lastMove);
+      this.redoStack = this.savedState.redoStack ? this.savedState.redoStack.slice() : [];
       this.setData({
         message: this.savedState.message,
         gameOver: this.savedState.gameOver,
@@ -450,7 +467,8 @@ Page({
     if (!snapshot) return;
     this.replayIndex = index;
     this.applySnapshot(snapshot);
-    this.lastMove = this.history[index] ? { ...this.history[index].position, player: this.history[index].player } : null;
+    const historyEntry = this.history[index];
+    this.lastMove = this.moveFromHistory(historyEntry);
     this.setData({
       message: `复盘至第 ${index + 1} 手`,
       gameOver: true
@@ -472,9 +490,8 @@ Page({
     this.boardSnapshots = this.boardSnapshots.slice(0, index + 2);
     this.redoStack = [];
     this.applySnapshot(snapshot);
-    this.lastMove = this.history[index]
-      ? { ...this.history[index].position, player: this.history[index].player }
-      : null;
+    const applyEntry = this.history[index];
+    this.lastMove = this.moveFromHistory(applyEntry);
     this.setData({
       historyList: this.history.map(item => ({ moveNumber: item.moveNumber, label: item.label, detail: item.detail })),
       historyVisible: false,
@@ -514,9 +531,8 @@ Page({
 
     const latestSnapshot = this.boardSnapshots[this.boardSnapshots.length - 1];
     this.applySnapshot(latestSnapshot);
-    this.lastMove = this.history.length
-      ? { ...this.history[this.history.length - 1].position, player: this.history[this.history.length - 1].player }
-      : null;
+    const lastHistory = this.history.length ? this.history[this.history.length - 1] : null;
+    this.lastMove = this.moveFromHistory(lastHistory);
     this.setData({
       historyList: this.history.map(item => ({ moveNumber: item.moveNumber, label: item.label, detail: item.detail })),
       message: '悔棋成功',
@@ -550,9 +566,8 @@ Page({
 
     const latestSnapshot = this.boardSnapshots[this.boardSnapshots.length - 1];
     this.applySnapshot(latestSnapshot);
-    this.lastMove = this.history.length
-      ? { ...this.history[this.history.length - 1].position, player: this.history[this.history.length - 1].player }
-      : null;
+    const latestHistory = this.history.length ? this.history[this.history.length - 1] : null;
+    this.lastMove = this.moveFromHistory(latestHistory);
     this.setData({
       historyList: this.history.map(item => ({ moveNumber: item.moveNumber, label: item.label, detail: item.detail })),
       message: '已恢复棋步',
@@ -640,6 +655,29 @@ Page({
 
   cloneBoard(board) {
     return board.map(row => row.slice());
+  },
+
+  cloneMove(move) {
+    if (!move) {
+      return null;
+    }
+    return {
+      x: move.x,
+      y: move.y,
+      player: move.player
+    };
+  },
+
+  moveFromHistory(entry) {
+    if (!entry || !entry.position) {
+      return null;
+    }
+    const position = entry.position;
+    return {
+      x: position.x,
+      y: position.y,
+      player: entry.player
+    };
   },
 
   applySnapshot(snapshot) {

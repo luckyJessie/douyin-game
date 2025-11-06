@@ -17,7 +17,8 @@ const DEFAULT_OPTIONS = {
 export default class GomokuAI {
   constructor(options = {}) {
     this.winScore = 1_000_000;
-    this.applyOptions({ ...DEFAULT_OPTIONS, ...options });
+    const mergedOptions = this.mergeOptions(DEFAULT_OPTIONS, options);
+    this.applyOptions(mergedOptions);
   }
 
   applyOptions(options) {
@@ -30,7 +31,8 @@ export default class GomokuAI {
   }
 
   setOptions(options = {}) {
-    this.applyOptions({ ...DEFAULT_OPTIONS, ...options });
+    const mergedOptions = this.mergeOptions(DEFAULT_OPTIONS, options);
+    this.applyOptions(mergedOptions);
   }
 
   bestMove(board, aiPlayer = -1) {
@@ -56,7 +58,11 @@ export default class GomokuAI {
       board[move.y][move.x] = 0;
 
       if (!best || score > best.score) {
-        best = { ...move, score };
+        best = {
+          x: move.x,
+          y: move.y,
+          score
+        };
       }
 
       if (score > alpha) {
@@ -414,5 +420,23 @@ export default class GomokuAI {
       }
     }
     return total;
+  }
+
+  mergeOptions(defaults, overrides) {
+    const result = {};
+    this.assignOptions(result, defaults);
+    this.assignOptions(result, overrides);
+    return result;
+  }
+
+  assignOptions(target, source) {
+    if (!source) {
+      return;
+    }
+    const keys = Object.keys(source);
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      target[key] = source[key];
+    }
   }
 }
