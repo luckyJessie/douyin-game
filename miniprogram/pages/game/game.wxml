@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="status-panel">
+    <text class="message">{{message}}</text>
+    <view class="turn-indicator">
+      <text>{{isPlayerTurn ? '当前：玩家落子' : '当前：AI思考中'}}</text>
+      <text class="first-player">先手：{{playerFirst ? '玩家' : 'AI'}}</text>
+    </view>
+  </view>
+
+  <view class="board">
+    <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
+      <view class="board-row">
+        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
+          <view
+            class="cell {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}} {{gameOver ? 'disabled' : ''}}"
+            data-row="{{rowIndex}}"
+            data-col="{{colIndex}}"
+            bindtap="handleCellTap"
+          >
+            <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
+            <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
+          </view>
+        </block>
+      </view>
+    </block>
+  </view>
+
+  <view class="legend">
+    <view class="legend-item">
+      <view class="piece player small"></view>
+      <text>玩家（黑子）</text>
+    </view>
+    <view class="legend-item">
+      <view class="piece ai small"></view>
+      <text>AI（白子）</text>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button class="btn-primary" size="mini" bindtap="resetGame">重新开始</button>
+    <button class="btn-secondary" size="mini" bindtap="toggleFirstMove">切换先手</button>
+  </view>
+
+  <view class="tips">
+    <text>提示：点击棋盘交叉点落子，AI 使用启发式搜索算法进行思考。</text>
+  </view>
+</view>

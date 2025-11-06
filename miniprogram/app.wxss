@@ -1,0 +1,16 @@
+page {
+  background-color: #f5f5f5;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ffb347, #ffcc33);
+  color: #2d2d2d;
+  border: none;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #2d2d2d;
+  border: 1px solid #d8d8d8;
+}
