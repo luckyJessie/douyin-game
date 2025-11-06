@@ -4,18 +4,33 @@ Page({
   data: {
     board: [],
     boardSize: 0,
-    currentPlayer: 1, // 1: 玩家(黑), 2: AI(白)
-    gameStatus: '玩家回合',
+    currentPlayer: 1, // 1: 玩家1(黑), 2: 玩家2/AI(白)
+    gameStatus: '玩家1回合',
     gameOver: false,
-    moveHistory: []
+    moveHistory: [],
+    gameMode: 'ai', // 'ai' 或 'pvp'
+    difficulty: 'medium', // 'easy', 'medium', 'hard'
+    aiFirst: false,
+    coordinates: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
   },
 
-  onLoad() {
-    this.initGame()
+  onLoad(options) {
+    // 从菜单页面获取参数
+    const mode = options.mode || 'ai'
+    const difficulty = options.difficulty || 'medium'
+    const aiFirst = options.aiFirst === 'true'
+    
+    this.setData({
+      gameMode: mode,
+      difficulty,
+      aiFirst
+    })
+    
+    this.initGame(aiFirst)
   },
 
   // 初始化游戏
-  initGame() {
+  initGame(skipAIFirstMove = false) {
     const size = 15
     const board = []
     for (let i = 0; i < size; i++) {
@@ -27,30 +42,53 @@ Page({
     
     // 计算棋盘显示尺寸（根据屏幕宽度）
     const systemInfo = wx.getSystemInfoSync()
-    const boardSize = Math.min(systemInfo.windowWidth - 80, 650)
+    const boardSize = Math.min(systemInfo.windowWidth - 100, 600)
+    
+    const currentPlayer = 1
+    const gameStatus = this.data.gameMode === 'pvp' ? '玩家1回合' : 
+                      (this.data.aiFirst ? '电脑思考中...' : '玩家回合')
     
     this.setData({
       board,
       boardSize,
-      currentPlayer: 1,
-      gameStatus: '玩家回合',
+      currentPlayer,
+      gameStatus,
       gameOver: false,
       moveHistory: []
     })
+
+    // 如果AI先手，自动下第一步
+    if (!skipAIFirstMove && this.data.gameMode === 'ai' && this.data.aiFirst) {
+      setTimeout(() => {
+        this.aiMove()
+      }, 500)
+    }
   },
 
   // 处理点击棋盘
   onCellTap(e) {
-    if (this.data.gameOver || this.data.currentPlayer !== 1) {
+    if (this.data.gameOver) {
+      return
+    }
+
+    // 双人对战：两个玩家都可以下
+    // 人机对战：只有玩家1可以下（currentPlayer === 1）
+    if (this.data.gameMode === 'ai' && this.data.currentPlayer !== 1) {
       return
     }
 
     const { row, col } = e.currentTarget.dataset
     if (this.data.board[row][col] !== 0) {
+      wx.showToast({
+        title: '该位置已有棋子',
+        icon: 'none',
+        duration: 1000
+      })
       return
     }
 
-    this.makeMove(row, col, 1)
+    const player = this.data.currentPlayer
+    this.makeMove(row, col, player)
   },
 
   // 执行落子
@@ -64,13 +102,28 @@ Page({
     const winner = this.checkWinner(board, row, col)
     
     if (winner) {
+      let statusText = ''
+      if (this.data.gameMode === 'pvp') {
+        statusText = winner === 1 ? '玩家1获胜！' : '玩家2获胜！'
+      } else {
+        statusText = winner === 1 ? '玩家获胜！' : '电脑获胜！'
+      }
+      
       this.setData({
         board,
         moveHistory,
         gameOver: true,
-        gameStatus: winner === 1 ? '玩家获胜！' : '电脑获胜！',
+        gameStatus: statusText,
         currentPlayer: 0
       })
+      
+      // 显示获胜提示
+      wx.showModal({
+        title: '游戏结束',
+        content: statusText,
+        showCancel: false
+      })
+      
       return
     }
 
@@ -83,21 +136,35 @@ Page({
         gameStatus: '平局！',
         currentPlayer: 0
       })
+      
+      wx.showModal({
+        title: '游戏结束',
+        content: '平局！',
+        showCancel: false
+      })
+      
       return
     }
 
     // 切换玩家
     const nextPlayer = player === 1 ? 2 : 1
+    let nextStatus = ''
+    
+    if (this.data.gameMode === 'pvp') {
+      nextStatus = nextPlayer === 1 ? '玩家1回合' : '玩家2回合'
+    } else {
+      nextStatus = nextPlayer === 1 ? '玩家回合' : '电脑思考中...'
+    }
     
     this.setData({
       board,
       moveHistory,
       currentPlayer: nextPlayer,
-      gameStatus: nextPlayer === 1 ? '玩家回合' : '电脑思考中...'
+      gameStatus: nextStatus
     })
 
-    // 如果是AI回合，延迟后执行AI落子
-    if (nextPlayer === 2 && !this.data.gameOver) {
+    // 如果是AI回合（人机对战且轮到AI），延迟后执行AI落子
+    if (this.data.gameMode === 'ai' && nextPlayer === 2 && !this.data.gameOver) {
       setTimeout(() => {
         this.aiMove()
       }, 300)
@@ -106,7 +173,7 @@ Page({
 
   // AI落子
   aiMove() {
-    if (this.data.gameOver) {
+    if (this.data.gameOver || this.data.gameMode !== 'ai') {
       return
     }
 
@@ -117,7 +184,8 @@ Page({
 
     setTimeout(() => {
       const board = this.data.board.map(r => [...r])
-      const ai = new AI(board, 2, 1)
+      // 传入难度参数
+      const ai = new AI(board, 2, 1, this.data.difficulty)
       const move = ai.getBestMove()
 
       if (move) {
@@ -186,7 +254,15 @@ Page({
 
   // 重新开始游戏
   restartGame() {
-    this.initGame()
+    wx.showModal({
+      title: '重新开始',
+      content: '确定要重新开始游戏吗？',
+      success: (res) => {
+        if (res.confirm) {
+          this.initGame(this.data.aiFirst)
+        }
+      }
+    })
   },
 
   // 悔棋
@@ -199,22 +275,30 @@ Page({
       return
     }
 
-    // 回溯两步（玩家和AI各一步）
+    // 双人对战：撤销一步
+    // 人机对战：撤销两步（玩家和AI各一步）
+    const steps = this.data.gameMode === 'pvp' ? 1 : 2
+    
     const board = this.data.board.map(r => [...r])
     const moveHistory = [...this.data.moveHistory]
     
-    if (moveHistory.length >= 2) {
-      // 移除最后两步
-      const move1 = moveHistory.pop()
-      const move2 = moveHistory.pop()
-      board[move1.row][move1.col] = 0
-      board[move2.row][move2.col] = 0
+    if (moveHistory.length >= steps) {
+      // 移除最后N步
+      for (let i = 0; i < steps; i++) {
+        const move = moveHistory.pop()
+        board[move.row][move.col] = 0
+      }
+      
+      const nextPlayer = steps === 1 ? (this.data.currentPlayer === 1 ? 2 : 1) : 1
+      const nextStatus = this.data.gameMode === 'pvp' 
+        ? (nextPlayer === 1 ? '玩家1回合' : '玩家2回合')
+        : '玩家回合'
       
       this.setData({
         board,
         moveHistory,
-        currentPlayer: 1,
-        gameStatus: '玩家回合'
+        currentPlayer: nextPlayer,
+        gameStatus: nextStatus
       })
     } else if (moveHistory.length === 1) {
       // 只有一步，移除它
@@ -225,8 +309,21 @@ Page({
         board,
         moveHistory,
         currentPlayer: 1,
-        gameStatus: '玩家回合'
+        gameStatus: this.data.gameMode === 'pvp' ? '玩家1回合' : '玩家回合'
       })
     }
+  },
+
+  // 返回菜单
+  goBack() {
+    wx.showModal({
+      title: '返回菜单',
+      content: '确定要返回菜单吗？当前游戏进度将丢失。',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateBack()
+        }
+      }
+    })
   }
 })

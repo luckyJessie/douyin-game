@@ -1,0 +1,90 @@
+<view class="menu-container">
+  <view class="header">
+    <text class="title">五子棋</text>
+    <text class="subtitle">GOMOKU</text>
+  </view>
+
+  <view class="menu-content">
+    <!-- 游戏模式选择 -->
+    <view class="menu-section">
+      <text class="section-title">游戏模式</text>
+      <view class="options">
+        <view 
+          class="option-item {{gameMode === 'ai' ? 'active' : ''}}"
+          bindtap="selectGameMode"
+          data-mode="ai"
+        >
+          <text class="option-icon">🤖</text>
+          <text class="option-text">人机对战</text>
+        </view>
+        <view 
+          class="option-item {{gameMode === 'pvp' ? 'active' : ''}}"
+          bindtap="selectGameMode"
+          data-mode="pvp"
+        >
+          <text class="option-icon">👥</text>
+          <text class="option-text">双人对战</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 难度选择（仅人机对战显示） -->
+    <view class="menu-section" wx:if="{{gameMode === 'ai'}}">
+      <text class="section-title">AI难度</text>
+      <view class="options">
+        <view 
+          class="option-item {{difficulty === 'easy' ? 'active' : ''}}"
+          bindtap="selectDifficulty"
+          data-difficulty="easy"
+        >
+          <text class="option-icon">🌱</text>
+          <text class="option-text">简单</text>
+        </view>
+        <view 
+          class="option-item {{difficulty === 'medium' ? 'active' : ''}}"
+          bindtap="selectDifficulty"
+          data-difficulty="medium"
+        >
+          <text class="option-icon">⚡</text>
+          <text class="option-text">中等</text>
+        </view>
+        <view 
+          class="option-item {{difficulty === 'hard' ? 'active' : ''}}"
+          bindtap="selectDifficulty"
+          data-difficulty="hard"
+        >
+          <text class="option-icon">🔥</text>
+          <text class="option-text">困难</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI先手选择（仅人机对战显示） -->
+    <view class="menu-section" wx:if="{{gameMode === 'ai'}}">
+      <text class="section-title">谁先手</text>
+      <view class="options">
+        <view 
+          class="option-item {{aiFirst === false ? 'active' : ''}}"
+          bindtap="selectFirstMove"
+          data-first="false"
+        >
+          <text class="option-icon">⚫</text>
+          <text class="option-text">我先手</text>
+        </view>
+        <view 
+          class="option-item {{aiFirst === true ? 'active' : ''}}"
+          bindtap="selectFirstMove"
+          data-first="true"
+        >
+          <text class="option-icon">⚪</text>
+          <text class="option-text">AI先手</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 开始游戏按钮 -->
+  <view class="footer">
+    <button class="start-btn" bindtap="startGame">开始游戏</button>
+  </view>
+</view>

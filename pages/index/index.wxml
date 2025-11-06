@@ -2,42 +2,86 @@
   <view class="game-info">
     <view class="status-text">{{gameStatus}}</view>
     <view class="player-info">
-      <text class="player-label">玩家：</text>
-      <text class="{{currentPlayer === 1 ? 'active' : ''}}">⚫</text>
-      <text class="player-label">电脑：</text>
-      <text class="{{currentPlayer === 2 ? 'active' : ''}}">⚪</text>
+      <view class="player-item {{currentPlayer === 1 ? 'active' : ''}}">
+        <text class="player-label">玩家</text>
+        <view class="chess-piece-preview black"></view>
+      </view>
+      <text class="vs-text">VS</text>
+      <view class="player-item {{currentPlayer === 2 ? 'active' : ''}}">
+        <view class="chess-piece-preview white"></view>
+        <text class="player-label">{{gameMode === 'ai' ? '电脑' : '玩家2'}}</text>
+      </view>
     </view>
   </view>
   
-  <view class="chessboard-container">
-    <view class="chessboard" style="width: {{boardSize}}px; height: {{boardSize}}px;">
-      <view 
-        wx:for="{{board}}" 
-        wx:for-item="row" 
-        wx:for-index="i"
-        wx:key="i"
-        class="chess-row"
-      >
-        <view 
-          wx:for="{{row}}" 
-          wx:for-item="cell" 
-          wx:for-index="j"
-          wx:key="j"
-          class="chess-cell"
-          data-row="{{i}}"
-          data-col="{{j}}"
-          bindtap="onCellTap"
-        >
-          <view class="cell-line"></view>
-          <view wx:if="{{cell === 1}}" class="chess-piece black"></view>
-          <view wx:elif="{{cell === 2}}" class="chess-piece white"></view>
+  <view class="chessboard-wrapper">
+    <view class="chessboard-container">
+      <!-- 顶部坐标 -->
+      <view class="coordinate-row top">
+        <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
+      </view>
+      
+      <view class="chessboard-content">
+        <!-- 左侧坐标 -->
+        <view class="coordinate-col left">
+          <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
         </view>
+        
+        <!-- 棋盘 -->
+        <view class="chessboard" style="width: {{boardSize}}px; height: {{boardSize}}px;">
+          <!-- 背景网格线 -->
+          <view class="board-grid">
+            <view wx:for="{{15}}" wx:key="*this" wx:for-index="idx" class="grid-line vertical" style="left: {{(boardSize / 15) * idx}}px;"></view>
+            <view wx:for="{{15}}" wx:key="*this" wx:for-index="idx" class="grid-line horizontal" style="top: {{(boardSize / 15) * idx}}px;"></view>
+          </view>
+          
+          <!-- 星位标记（天元+四个星位） -->
+          <view class="star-point" style="left: {{boardSize / 15 * 3}}px; top: {{boardSize / 15 * 3}}px;"></view>
+          <view class="star-point" style="left: {{boardSize / 15 * 11}}px; top: {{boardSize / 15 * 3}}px;"></view>
+          <view class="star-point" style="left: {{boardSize / 15 * 3}}px; top: {{boardSize / 15 * 11}}px;"></view>
+          <view class="star-point" style="left: {{boardSize / 15 * 11}}px; top: {{boardSize / 15 * 11}}px;"></view>
+          <view class="star-point center" style="left: {{boardSize / 15 * 7}}px; top: {{boardSize / 15 * 7}}px;"></view>
+          
+          <!-- 棋子 -->
+          <view 
+            wx:for="{{board}}" 
+            wx:for-item="row" 
+            wx:for-index="i"
+            wx:key="i"
+            class="chess-row"
+          >
+            <view 
+              wx:for="{{row}}" 
+              wx:for-item="cell" 
+              wx:for-index="j"
+              wx:key="j"
+              class="chess-cell"
+              data-row="{{i}}"
+              data-col="{{j}}"
+              bindtap="onCellTap"
+            >
+              <view wx:if="{{cell === 1}}" class="chess-piece black"></view>
+              <view wx:elif="{{cell === 2}}" class="chess-piece white"></view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 右侧坐标 -->
+        <view class="coordinate-col right">
+          <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
+        </view>
+      </view>
+      
+      <!-- 底部坐标 -->
+      <view class="coordinate-row bottom">
+        <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
       </view>
     </view>
   </view>
   
   <view class="action-buttons">
-    <button class="btn" bindtap="restartGame">重新开始</button>
-    <button class="btn" bindtap="undoMove">悔棋</button>
+    <button class="btn btn-secondary" bindtap="goBack">返回菜单</button>
+    <button class="btn btn-primary" bindtap="restartGame">重新开始</button>
+    <button class="btn btn-secondary" bindtap="undoMove">悔棋</button>
   </view>
 </view>

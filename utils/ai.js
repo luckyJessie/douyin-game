@@ -6,28 +6,43 @@
 const OpeningBook = require('./openingBook.js')
 
 class AI {
-  constructor(board, aiPlayer, humanPlayer) {
+  constructor(board, aiPlayer, humanPlayer, difficulty = 'medium') {
     this.board = board.map(r => [...r])
     this.aiPlayer = aiPlayer // AI玩家（通常为2）
     this.humanPlayer = humanPlayer // 人类玩家（通常为1）
     this.size = board.length
     this.openingBook = new OpeningBook()
+    this.difficulty = difficulty // 'easy', 'medium', 'hard'
     
     // 计算当前局面信息
     this.moveCount = this.countMoves(board)
     this.isEndgame = this.moveCount > this.size * this.size * 0.6 // 60%以上棋子已下
     
-    // 自适应搜索深度
-    if (this.isEndgame) {
-      this.depth = 5 // 终局加深搜索
-    } else if (this.moveCount < 10) {
-      this.depth = 3 // 开局较浅
-    } else {
-      this.depth = 4 // 中局
-    }
+    // 根据难度和阶段设置搜索深度
+    this.setDepthByDifficulty()
     
     // 位置权重表（角、边、中心的权重不同）
     this.initPositionWeights()
+  }
+
+  /**
+   * 根据难度设置搜索深度
+   */
+  setDepthByDifficulty() {
+    const depthConfig = {
+      'easy': { start: 2, mid: 2, end: 3 },
+      'medium': { start: 3, mid: 4, end: 5 },
+      'hard': { start: 3, mid: 5, end: 6 }
+    }
+    const baseDepth = depthConfig[this.difficulty] || depthConfig.medium
+
+    if (this.isEndgame) {
+      this.depth = baseDepth.end // 终局加深搜索
+    } else if (this.moveCount < 10) {
+      this.depth = baseDepth.start // 开局较浅
+    } else {
+      this.depth = baseDepth.mid // 中局
+    }
   }
 
   /**
