@@ -43,6 +43,7 @@ const STAR_POINT_MAP = STAR_POINTS.reduce((acc, point) => {
 }, {});
 
 const LINE_POSITIONS = Array.from({ length: BOARD_SIZE }, (_, index) => ((index / (BOARD_SIZE - 1)) * 100).toFixed(4));
+const POINT_POSITIONS = Array.from({ length: BOARD_SIZE }, (_, index) => ((((index + 0.5) / BOARD_SIZE) * 100)).toFixed(4));
 
 const LINES = computeLines();
 
@@ -51,7 +52,9 @@ Page({
     board: createEmptyBoard(),
     boardSize: BOARD_SIZE,
     starPointsMap: STAR_POINT_MAP,
+    starPoints: STAR_POINTS,
     linePositions: LINE_POSITIONS,
+    pointPositions: POINT_POSITIONS,
     isPlayerTurn: true,
     gameOver: false,
     message: '玩家先手，请落子',
@@ -59,6 +62,7 @@ Page({
     playerFirst: true,
     hintMove: null,
     canUndo: false,
+    EMPTY,
     difficultyIndex: 1,
     difficultyLabel: DIFFICULTY_SETTINGS[1].label,
     isOnlineMode: false,

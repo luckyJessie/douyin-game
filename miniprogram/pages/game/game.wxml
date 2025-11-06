@@ -49,21 +49,37 @@
       </block>
     </view>
 
+    <view class="star-layer">
+      <block wx:for="{{starPoints}}" wx:key="{{item.row}}-{{item.col}}">
+        <view class="star-dot" style="top: {{pointPositions[item.row]}}%; left: {{pointPositions[item.col]}}%;"></view>
+      </block>
+    </view>
+
     <view class="stone-layer">
       <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
-        <view class="board-row">
-          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
-            <view
-              class="cell {{starPointsMap[rowIndex + '-' + colIndex] ? 'star-point' : ''}} {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}} {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
-              data-row="{{rowIndex}}"
-              data-col="{{colIndex}}"
-              bindtap="handleCellTap"
-            >
-              <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
-              <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
-            </view>
-          </block>
-        </view>
+        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
+          <view
+            wx:if="{{cell === AI_PLAYER || cell === HUMAN_PLAYER}}"
+            class="piece-wrapper {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}}"
+            style="top: {{pointPositions[rowIndex]}}%; left: {{pointPositions[colIndex]}}%;"
+          >
+            <view class="piece {{cell === AI_PLAYER ? 'ai' : 'player'}}"></view>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <view class="touch-layer">
+      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
+        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
+          <view
+            class="touch-point {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
+            style="top: {{pointPositions[rowIndex]}}%; left: {{pointPositions[colIndex]}}%;"
+            data-row="{{rowIndex}}"
+            data-col="{{colIndex}}"
+            bindtap="handleCellTap"
+          ></view>
+        </block>
       </block>
     </view>
   </view>
