@@ -11,7 +11,9 @@ Page({
     gameMode: 'ai', // 'ai' 或 'pvp'
     difficulty: 'medium', // 'easy', 'medium', 'hard'
     aiFirst: false,
-    coordinates: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
+    timeLeft: 30, // 剩余时间（秒）
+    timeProgress: 100, // 时间进度百分比
+    timerInterval: null // 定时器
   },
 
   onLoad(options) {
@@ -27,6 +29,186 @@ Page({
     })
     
     this.initGame(aiFirst)
+  },
+
+  onUnload() {
+    // 清理定时器
+    this.clearTimer()
+  },
+
+  // 清理定时器
+  clearTimer() {
+    if (this.data.timerInterval) {
+      clearInterval(this.data.timerInterval)
+      this.setData({ timerInterval: null })
+    }
+  },
+
+  // 启动倒计时
+  startTimer() {
+    // 先清理旧的定时器
+    this.clearTimer()
+    
+    // 重置时间
+    this.setData({ 
+      timeLeft: 30,
+      timeProgress: 100
+    })
+
+    // 只在双人对战模式下启动倒计时
+    if (this.data.gameMode === 'pvp' && !this.data.gameOver) {
+      const interval = setInterval(() => {
+        let timeLeft = this.data.timeLeft - 1
+        
+        if (timeLeft <= 0) {
+          // 超时，自动落子
+          this.clearTimer()
+          this.autoMove()
+          return
+        }
+
+        const timeProgress = (timeLeft / 30) * 100
+        
+        this.setData({
+          timeLeft,
+          timeProgress
+        })
+      }, 1000)
+
+      this.setData({ timerInterval: interval })
+    }
+  },
+
+  // 超时自动落子
+  autoMove() {
+    if (this.data.gameOver || this.data.gameMode !== 'pvp') {
+      return
+    }
+
+    // 使用简单的AI选择最佳位置
+    const board = this.data.board.map(r => [...r])
+    const move = this.getAutoMove(board, this.data.currentPlayer)
+
+    if (move) {
+      wx.showToast({
+        title: '超时自动落子',
+        icon: 'none',
+        duration: 1500
+      })
+      
+      setTimeout(() => {
+        this.makeMove(move.row, move.col, this.data.currentPlayer)
+      }, 300)
+    } else {
+      // 如果找不到好的位置，随机选择
+      const moves = this.getValidMoves(board)
+      if (moves.length > 0) {
+        const randomMove = moves[Math.floor(Math.random() * moves.length)]
+        wx.showToast({
+          title: '超时随机落子',
+          icon: 'none',
+          duration: 1500
+        })
+        setTimeout(() => {
+          this.makeMove(randomMove.row, randomMove.col, this.data.currentPlayer)
+        }, 300)
+      }
+    }
+  },
+
+  // 获取自动落子位置（简单AI逻辑）
+  getAutoMove(board, player) {
+    const size = board.length
+    let bestMove = null
+    let bestScore = -Infinity
+
+    // 获取所有有效位置
+    const moves = this.getValidMoves(board)
+
+    for (let move of moves) {
+      let score = 0
+      const { row, col } = move
+
+      // 检查是否能直接获胜
+      board[row][col] = player
+      if (this.checkWinner(board, row, col) === player) {
+        board[row][col] = 0
+        return move
+      }
+
+      // 检查是否需要防守（阻止对方获胜）
+      const opponent = player === 1 ? 2 : 1
+      board[row][col] = opponent
+      if (this.checkWinner(board, row, col) === opponent) {
+        board[row][col] = 0
+        return move // 必须防守
+      }
+      board[row][col] = 0
+
+      // 评估位置得分（简化版）
+      score += this.evaluateMoveScore(board, row, col, player)
+      
+      // 中心位置加分
+      const center = Math.floor(size / 2)
+      const distFromCenter = Math.abs(row - center) + Math.abs(col - center)
+      score += (size - distFromCenter) * 0.5
+
+      if (score > bestScore) {
+        bestScore = score
+        bestMove = move
+      }
+    }
+
+    return bestMove
+  },
+
+  // 评估位置得分（简化版）
+  evaluateMoveScore(board, row, col, player) {
+    let score = 0
+    const directions = [
+      [[0, 1], [0, -1]],   // 水平
+      [[1, 0], [-1, 0]],   // 垂直
+      [[1, 1], [-1, -1]],  // 主对角线
+      [[1, -1], [-1, 1]]   // 副对角线
+    ]
+
+    for (let dir of directions) {
+      let count = 1 // 模拟落子后的连子数
+
+      for (let d of dir) {
+        let r = row + d[0]
+        let c = col + d[1]
+        while (
+          r >= 0 && r < board.length &&
+          c >= 0 && c < board[0].length &&
+          board[r][c] === player
+        ) {
+          count++
+          r += d[0]
+          c += d[1]
+        }
+      }
+
+      // 根据连子数给分
+      if (count >= 4) score += 100
+      else if (count === 3) score += 20
+      else if (count === 2) score += 5
+    }
+
+    return score
+  },
+
+  // 获取所有有效落子位置
+  getValidMoves(board) {
+    const moves = []
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (board[i][j] === 0) {
+          moves.push({ row: i, col: j })
+        }
+      }
+    }
+    return moves
   },
 
   // 初始化游戏
@@ -48,13 +230,18 @@ Page({
     const gameStatus = this.data.gameMode === 'pvp' ? '玩家1回合' : 
                       (this.data.aiFirst ? '电脑思考中...' : '玩家回合')
     
+    // 清理定时器
+    this.clearTimer()
+    
     this.setData({
       board,
       boardSize,
       currentPlayer,
       gameStatus,
       gameOver: false,
-      moveHistory: []
+      moveHistory: [],
+      timeLeft: 30,
+      timeProgress: 100
     })
 
     // 如果AI先手，自动下第一步
@@ -62,6 +249,11 @@ Page({
       setTimeout(() => {
         this.aiMove()
       }, 500)
+    }
+    
+    // 双人对战模式，启动倒计时
+    if (this.data.gameMode === 'pvp') {
+      this.startTimer()
     }
   },
 
@@ -93,6 +285,9 @@ Page({
 
   // 执行落子
   makeMove(row, col, player) {
+    // 清理定时器
+    this.clearTimer()
+    
     const board = this.data.board.map(r => [...r])
     board[row][col] = player
     
@@ -162,6 +357,11 @@ Page({
       currentPlayer: nextPlayer,
       gameStatus: nextStatus
     })
+
+    // 如果是双人对战，启动倒计时
+    if (this.data.gameMode === 'pvp' && !this.data.gameOver) {
+      this.startTimer()
+    }
 
     // 如果是AI回合（人机对战且轮到AI），延迟后执行AI落子
     if (this.data.gameMode === 'ai' && nextPlayer === 2 && !this.data.gameOver) {
@@ -275,6 +475,9 @@ Page({
       return
     }
 
+    // 清理定时器
+    this.clearTimer()
+
     // 双人对战：撤销一步
     // 人机对战：撤销两步（玩家和AI各一步）
     const steps = this.data.gameMode === 'pvp' ? 1 : 2
@@ -300,6 +503,11 @@ Page({
         currentPlayer: nextPlayer,
         gameStatus: nextStatus
       })
+
+      // 如果是双人对战，重新启动倒计时
+      if (this.data.gameMode === 'pvp') {
+        this.startTimer()
+      }
     } else if (moveHistory.length === 1) {
       // 只有一步，移除它
       const move = moveHistory.pop()
@@ -311,6 +519,11 @@ Page({
         currentPlayer: 1,
         gameStatus: this.data.gameMode === 'pvp' ? '玩家1回合' : '玩家回合'
       })
+
+      // 如果是双人对战，重新启动倒计时
+      if (this.data.gameMode === 'pvp') {
+        this.startTimer()
+      }
     }
   },
 
@@ -321,6 +534,7 @@ Page({
       content: '确定要返回菜单吗？当前游戏进度将丢失。',
       success: (res) => {
         if (res.confirm) {
+          this.clearTimer()
           wx.navigateBack()
         }
       }

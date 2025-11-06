@@ -12,69 +12,54 @@
         <text class="player-label">{{gameMode === 'ai' ? '电脑' : '玩家2'}}</text>
       </view>
     </view>
+    <!-- 倒计时显示 -->
+    <view class="timer-container" wx:if="{{!gameOver && gameMode === 'pvp'}}">
+      <view class="timer-text">{{currentPlayer === 1 ? '玩家1' : '玩家2'}}剩余时间：{{timeLeft}}秒</view>
+      <view class="timer-bar">
+        <view class="timer-progress" style="width: {{timeProgress}}%"></view>
+      </view>
+    </view>
   </view>
   
   <view class="chessboard-wrapper">
     <view class="chessboard-container">
-      <!-- 顶部坐标 -->
-      <view class="coordinate-row top">
-        <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
-      </view>
-      
-      <view class="chessboard-content">
-        <!-- 左侧坐标 -->
-        <view class="coordinate-col left">
-          <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
+      <!-- 棋盘 -->
+      <view class="chessboard" style="width: {{boardSize}}px; height: {{boardSize}}px;">
+        <!-- 背景网格线 -->
+        <view class="board-grid">
+          <view wx:for="{{15}}" wx:key="*this" wx:for-index="idx" class="grid-line vertical" style="left: {{(boardSize / 15) * idx}}px;"></view>
+          <view wx:for="{{15}}" wx:key="*this" wx:for-index="idx" class="grid-line horizontal" style="top: {{(boardSize / 15) * idx}}px;"></view>
         </view>
         
-        <!-- 棋盘 -->
-        <view class="chessboard" style="width: {{boardSize}}px; height: {{boardSize}}px;">
-          <!-- 背景网格线 -->
-          <view class="board-grid">
-            <view wx:for="{{15}}" wx:key="*this" wx:for-index="idx" class="grid-line vertical" style="left: {{(boardSize / 15) * idx}}px;"></view>
-            <view wx:for="{{15}}" wx:key="*this" wx:for-index="idx" class="grid-line horizontal" style="top: {{(boardSize / 15) * idx}}px;"></view>
-          </view>
-          
-          <!-- 星位标记（天元+四个星位） -->
-          <view class="star-point" style="left: {{boardSize / 15 * 3}}px; top: {{boardSize / 15 * 3}}px;"></view>
-          <view class="star-point" style="left: {{boardSize / 15 * 11}}px; top: {{boardSize / 15 * 3}}px;"></view>
-          <view class="star-point" style="left: {{boardSize / 15 * 3}}px; top: {{boardSize / 15 * 11}}px;"></view>
-          <view class="star-point" style="left: {{boardSize / 15 * 11}}px; top: {{boardSize / 15 * 11}}px;"></view>
-          <view class="star-point center" style="left: {{boardSize / 15 * 7}}px; top: {{boardSize / 15 * 7}}px;"></view>
-          
-          <!-- 棋子 -->
+        <!-- 星位标记（天元+四个星位） -->
+        <view class="star-point" style="left: {{boardSize / 15 * 3}}px; top: {{boardSize / 15 * 3}}px;"></view>
+        <view class="star-point" style="left: {{boardSize / 15 * 11}}px; top: {{boardSize / 15 * 3}}px;"></view>
+        <view class="star-point" style="left: {{boardSize / 15 * 3}}px; top: {{boardSize / 15 * 11}}px;"></view>
+        <view class="star-point" style="left: {{boardSize / 15 * 11}}px; top: {{boardSize / 15 * 11}}px;"></view>
+        <view class="star-point center" style="left: {{boardSize / 15 * 7}}px; top: {{boardSize / 15 * 7}}px;"></view>
+        
+        <!-- 棋子 -->
+        <view 
+          wx:for="{{board}}" 
+          wx:for-item="row" 
+          wx:for-index="i"
+          wx:key="i"
+          class="chess-row"
+        >
           <view 
-            wx:for="{{board}}" 
-            wx:for-item="row" 
-            wx:for-index="i"
-            wx:key="i"
-            class="chess-row"
+            wx:for="{{row}}" 
+            wx:for-item="cell" 
+            wx:for-index="j"
+            wx:key="j"
+            class="chess-cell"
+            data-row="{{i}}"
+            data-col="{{j}}"
+            bindtap="onCellTap"
           >
-            <view 
-              wx:for="{{row}}" 
-              wx:for-item="cell" 
-              wx:for-index="j"
-              wx:key="j"
-              class="chess-cell"
-              data-row="{{i}}"
-              data-col="{{j}}"
-              bindtap="onCellTap"
-            >
-              <view wx:if="{{cell === 1}}" class="chess-piece black"></view>
-              <view wx:elif="{{cell === 2}}" class="chess-piece white"></view>
-            </view>
+            <view wx:if="{{cell === 1}}" class="chess-piece black"></view>
+            <view wx:elif="{{cell === 2}}" class="chess-piece white"></view>
           </view>
         </view>
-        
-        <!-- 右侧坐标 -->
-        <view class="coordinate-col right">
-          <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
-        </view>
-      </view>
-      
-      <!-- 底部坐标 -->
-      <view class="coordinate-row bottom">
-        <text wx:for="{{coordinates}}" wx:key="*this" wx:for-index="idx" class="coordinate">{{item}}</text>
       </view>
     </view>
   </view>
