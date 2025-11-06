@@ -40,21 +40,32 @@
   </view>
 
   <view class="board">
-    <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
-      <view class="board-row">
-        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
+    <view class="grid-layer">
+      <block wx:for="{{linePositions}}" wx:key="h-{{item}}">
+        <view class="grid-line horizontal" style="top: {{item}}%;"></view>
+      </block>
+      <block wx:for="{{linePositions}}" wx:key="v-{{item}}">
+        <view class="grid-line vertical" style="left: {{item}}%;"></view>
+      </block>
+    </view>
+
+    <view class="stone-layer">
+      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
+        <view class="board-row">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
             <view
               class="cell {{starPointsMap[rowIndex + '-' + colIndex] ? 'star-point' : ''}} {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}} {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
-            data-row="{{rowIndex}}"
-            data-col="{{colIndex}}"
-            bindtap="handleCellTap"
-          >
-            <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
-            <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
-          </view>
-        </block>
-      </view>
-    </block>
+              data-row="{{rowIndex}}"
+              data-col="{{colIndex}}"
+              bindtap="handleCellTap"
+            >
+              <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
+              <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
+            </view>
+          </block>
+        </view>
+      </block>
+    </view>
   </view>
 
   <view class="legend">
