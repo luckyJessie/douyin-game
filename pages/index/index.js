@@ -57,19 +57,26 @@ Page({
 
     // 只在双人对战模式下启动倒计时
     if (this.data.gameMode === 'pvp' && !this.data.gameOver) {
+      const that = this
       const interval = setInterval(() => {
-        let timeLeft = this.data.timeLeft - 1
+        // 检查游戏是否已结束
+        if (that.data.gameOver) {
+          that.clearTimer()
+          return
+        }
+        
+        let timeLeft = that.data.timeLeft - 1
         
         if (timeLeft <= 0) {
           // 超时，自动落子
-          this.clearTimer()
-          this.autoMove()
+          that.clearTimer()
+          that.autoMove()
           return
         }
 
         const timeProgress = (timeLeft / 30) * 100
         
-        this.setData({
+        that.setData({
           timeLeft,
           timeProgress
         })
@@ -377,11 +384,7 @@ Page({
       return
     }
 
-    wx.showLoading({
-      title: 'AI思考中...',
-      mask: true
-    })
-
+    // 异步执行AI思考，不阻塞界面
     setTimeout(() => {
       const board = this.data.board.map(r => [...r])
       // 传入难度参数
@@ -396,8 +399,6 @@ Page({
           icon: 'none'
         })
       }
-
-      wx.hideLoading()
     }, 100)
   },
 
