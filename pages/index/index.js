@@ -122,6 +122,11 @@ Page({
 
       if (move) {
         this.makeMove(move.row, move.col, 2)
+      } else {
+        wx.showToast({
+          title: '无法找到走法',
+          icon: 'none'
+        })
       }
 
       wx.hideLoading()
