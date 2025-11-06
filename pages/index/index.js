@@ -11,8 +11,9 @@ Page({
     gameMode: 'ai', // 'ai' 或 'pvp'
     difficulty: 'medium', // 'easy', 'medium', 'hard'
     aiFirst: false,
-    timeLeft: 30, // 剩余时间（秒）
+    timeLeft: 5, // 剩余时间（秒）
     timeProgress: 100, // 时间进度百分比
+    totalTime: 5, // 总时间（秒）
     timerInterval: null // 定时器
   },
 
@@ -50,9 +51,11 @@ Page({
     this.clearTimer()
     
     // 重置时间
+    const totalTime = 5
     this.setData({ 
-      timeLeft: 30,
-      timeProgress: 100
+      timeLeft: totalTime,
+      timeProgress: 100,
+      totalTime: totalTime
     })
 
     // 只在双人对战模式下启动倒计时
@@ -74,7 +77,7 @@ Page({
           return
         }
 
-        const timeProgress = (timeLeft / 30) * 100
+        const timeProgress = (timeLeft / that.data.totalTime) * 100
         
         that.setData({
           timeLeft,
@@ -247,8 +250,9 @@ Page({
       gameStatus,
       gameOver: false,
       moveHistory: [],
-      timeLeft: 30,
-      timeProgress: 100
+      timeLeft: 5,
+      timeProgress: 100,
+      totalTime: 5
     })
 
     // 如果AI先手，自动下第一步
