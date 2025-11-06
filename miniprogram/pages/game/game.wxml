@@ -43,8 +43,8 @@
     <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
       <view class="board-row">
         <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
-          <view
-            class="cell {{rowIndex === 0 ? 'first-row' : ''}} {{colIndex === 0 ? 'first-col' : ''}} {{rowIndex === boardSize - 1 ? 'last-row' : ''}} {{colIndex === boardSize - 1 ? 'last-col' : ''}} {{starPointsMap[rowIndex + '-' + colIndex] ? 'star-point' : ''}} {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}} {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
+            <view
+              class="cell {{starPointsMap[rowIndex + '-' + colIndex] ? 'star-point' : ''}} {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}} {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
             data-row="{{rowIndex}}"
             data-col="{{colIndex}}"
             bindtap="handleCellTap"
