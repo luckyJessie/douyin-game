@@ -43,7 +43,6 @@ const STAR_POINT_MAP = STAR_POINTS.reduce((acc, point) => {
 }, {});
 
 const LINE_POSITIONS = Array.from({ length: BOARD_SIZE }, (_, index) => ((index / (BOARD_SIZE - 1)) * 100).toFixed(4));
-const POINT_POSITIONS = Array.from({ length: BOARD_SIZE }, (_, index) => ((((index + 0.5) / BOARD_SIZE) * 100)).toFixed(4));
 
 const LINES = computeLines();
 
@@ -54,7 +53,6 @@ Page({
     starPointsMap: STAR_POINT_MAP,
     starPoints: STAR_POINTS,
     linePositions: LINE_POSITIONS,
-    pointPositions: POINT_POSITIONS,
     isPlayerTurn: true,
     gameOver: false,
     message: '玩家先手，请落子',
@@ -73,7 +71,14 @@ Page({
     onlineOpponentReady: false,
     onlineCanAct: false,
     AI_PLAYER,
-    HUMAN_PLAYER
+    HUMAN_PLAYER,
+    winToast: {
+      visible: false,
+      variant: 'player',
+      title: '',
+      message: '',
+      actionText: '再来一局'
+    }
   },
 
   async onLoad(options) {
@@ -105,6 +110,7 @@ Page({
       isPlayerTurn: this.data.isOnlineMode ? false : this.data.playerFirst,
       hintMove: null,
       canUndo: false,
+      winToast: { visible: false, variant: 'player', title: '', message: '', actionText: '再来一局' },
       onlineMessage: this.data.isOnlineMode ? '请选择「创建房间」或输入房间号加入' : '模式已切换为本地对弈',
       message: this.data.isOnlineMode ? '请创建或加入在线房间' : (this.data.playerFirst ? '玩家先手，请落子' : 'AI先手，AI 正在落子...')
     });
@@ -127,6 +133,7 @@ Page({
         lastMove: null,
         hintMove: null,
         canUndo: false,
+        winToast: { visible: false, variant: 'player', title: '', message: '', actionText: this.data.isOnlineMode ? '返回大厅' : '再来一局' },
         message: this.data.onlineRoomId ? '等待在线对手同步棋盘' : '请先创建或加入在线房间',
         onlineCanAct: false
       });
@@ -146,7 +153,8 @@ Page({
       message,
       lastMove: null,
       hintMove: null,
-      canUndo: false
+      canUndo: false,
+      winToast: { visible: false, variant: 'player', title: '', message: '', actionText: '再来一局' }
     });
 
     if (!playerFirst) {
@@ -200,6 +208,11 @@ Page({
         canUndo: this.history.length >= 2,
         message: '恭喜，你赢了！'
       });
+      this.showWinToast({
+        variant: 'player',
+        title: '胜利！',
+        message: '你成功击败了 AI，再来一局试试更高难度吧！'
+      });
       return;
     }
 
@@ -211,6 +224,11 @@ Page({
         hintMove: null,
         canUndo: this.history.length >= 2,
         message: '平局，双方旗鼓相当！'
+      });
+      this.showWinToast({
+        variant: 'draw',
+        title: '平局',
+        message: '旗鼓相当的一局！要不要再战一场？'
       });
       return;
     }
@@ -275,6 +293,11 @@ Page({
         canUndo: this.history.length >= 2,
         message: 'AI 获胜，下次再接再厉！'
       });
+      this.showWinToast({
+        variant: 'ai',
+        title: 'AI 获胜',
+        message: '这次 AI 更胜一筹，调整策略再来一次吧！'
+      });
       return;
     }
 
@@ -287,6 +310,11 @@ Page({
         hintMove: null,
         canUndo: this.history.length >= 2,
         message: '棋盘已满，平局结束'
+      });
+      this.showWinToast({
+        variant: 'draw',
+        title: '平局',
+        message: '棋盘已满，双方不分胜负！再试一局？'
       });
       return;
     }
@@ -566,7 +594,7 @@ Page({
       message: winner ? '落子已提交，判定胜负中' : '已落子，等待对手回应'
     });
 
-    await this.syncMoveToCloud(board, move, winner, draw);
+      await this.syncMoveToCloud(board, move, winner, draw);
   },
 
   async syncMoveToCloud(board, move, winner, draw) {
@@ -595,6 +623,15 @@ Page({
         gameOver: !!(winner || draw),
         message: winner ? (winner === this.onlinePlayerRole ? '你获胜啦！' : '等待系统确认') : (draw ? '双方平局，等待确认' : '等待对手落子')
       });
+      if (winner || draw) {
+        const variant = draw ? 'draw' : (winner === this.onlinePlayerRole ? 'player' : 'ai');
+        this.showWinToast({
+          variant,
+          title: draw ? '平局' : (variant === 'player' ? '胜利！' : '对手获胜'),
+          message: draw ? '棋局平分秋色，点击返回模式选择开启下一局。' : (variant === 'player' ? '你赢下了本局，点击返回模式选择开始新对局。' : '对手获胜，点击返回模式选择后可再次挑战。'),
+          actionText: '返回模式选择'
+        });
+      }
     } catch (error) {
       console.error('syncMove error', error);
       this.setData({ onlineMessage: '同步失败，请检查网络后重试' });
@@ -676,6 +713,19 @@ Page({
       hintMove: null,
       canUndo: false
     });
+      if (winner && !this.data.winToast.visible) {
+        const variant = winner === 'draw' ? 'draw' : (winner === this.onlinePlayerRole ? 'player' : 'ai');
+        this.showWinToast({
+          variant,
+          title: winner === 'draw' ? '平局' : (variant === 'player' ? '胜利！' : '对手获胜'),
+          message: winner === 'draw'
+            ? '棋局平分秋色，点击返回模式选择开启下一局。'
+            : variant === 'player'
+              ? '你赢下了本局，点击返回模式选择开始新的对局。'
+              : '对手赢得了本局，点击返回模式选择后可再次挑战。',
+          actionText: '返回模式选择'
+        });
+      }
   },
 
   async ensureDatabase() {
@@ -698,6 +748,27 @@ Page({
       }
     }
     return this.db;
+  },
+
+  handleToastAction() {
+    if (this.data.isOnlineMode) {
+      this.returnToLobby();
+      return;
+    }
+    this.resetGame();
+  },
+
+  showWinToast({ variant, title, message, actionText }) {
+    const defaultAction = this.data.isOnlineMode ? '返回模式选择' : '再来一局';
+    this.setData({
+      winToast: {
+        visible: true,
+        variant,
+        title,
+        message,
+        actionText: actionText || defaultAction
+      }
+    });
   }
 });
 
