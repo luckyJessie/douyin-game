@@ -1,0 +1,18 @@
+<view class="container">
+  <canvas
+    type="2d"
+    canvas-id="board"
+    class="board"
+    style="width:{{canvasSize}}px;height:{{canvasSize}}px;"
+    bindtouchend="handleTouch"
+  ></canvas>
+
+  <view class="panel">
+    <text class="message">{{message}}</text>
+    <view class="buttons">
+      <button type="primary" size="mini" bindtap="restartGame">重新开始</button>
+      <button size="mini" bindtap="toggleFirst">{{humanFirst ? '切换为电脑先手' : '切换为我先手'}}</button>
+    </view>
+    <text class="tip">提示：点击棋盘交叉点即可落子，切换先手后会自动重开。</text>
+  </view>
+</view>

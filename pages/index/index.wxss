@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx;
+}
+
+.board {
+  border: 4rpx solid #8b4513;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+  background: #f5deb3;
+}
+
+.panel {
+  margin-top: 36rpx;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.message {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 24rpx;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+.buttons button {
+  min-width: 200rpx;
+}
+
+.tip {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+  line-height: 1.5;
+}

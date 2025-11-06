@@ -1,0 +1,19 @@
+{
+  "appid": "touristappid",
+  "projectname": "gomoku-ai",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "libVersion": "2.32.3",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true
+  },
+  "condition": {}
+}
