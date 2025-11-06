@@ -75,6 +75,14 @@
 /* 倒计时 */
 .timer-container {
   margin-top: 20rpx;
+  min-height: 80rpx; /* 固定最小高度，避免布局跳动 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-content {
+  width: 100%;
   padding: 15rpx 30rpx;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 15rpx;

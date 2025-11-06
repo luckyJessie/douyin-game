@@ -12,11 +12,13 @@
         <text class="player-label">{{gameMode === 'ai' ? '电脑' : '玩家2'}}</text>
       </view>
     </view>
-    <!-- 倒计时显示 -->
-    <view class="timer-container" wx:if="{{!gameOver && currentPlayer === 1}}">
-      <view class="timer-text">剩余时间：{{timeLeft}}秒</view>
-      <view class="timer-bar">
-        <view class="timer-progress" style="width: {{timeProgress}}%"></view>
+    <!-- 倒计时显示（固定高度，避免布局跳动） -->
+    <view class="timer-container">
+      <view class="timer-content" wx:if="{{!gameOver && currentPlayer === 1}}">
+        <view class="timer-text">剩余时间：{{timeLeft}}秒</view>
+        <view class="timer-bar">
+          <view class="timer-progress" style="width: {{timeProgress}}%"></view>
+        </view>
       </view>
     </view>
   </view>
