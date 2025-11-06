@@ -25,13 +25,43 @@
   margin-bottom: 24rpx;
 }
 
-.buttons {
+
+.controls {
+  width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   gap: 24rpx;
 }
 
-.buttons button {
+.control-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20rpx;
+  flex-wrap: wrap;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.control-label {
+  font-size: 26rpx;
+  color: #444;
+}
+
+.picker-value {
+  min-width: 200rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1rpx solid rgba(0, 0, 0, 0.08);
+}
+
+.controls button {
   min-width: 200rpx;
 }
 
@@ -41,4 +71,89 @@
   color: #666;
   text-align: center;
   line-height: 1.5;
+}
+
+.online-panel {
+  margin-top: 24rpx;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.room-input {
+  width: 80%;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #c49b62;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+  z-index: 10;
+}
+
+.history-dialog {
+  width: 88%;
+  max-height: 80%;
+  background: #fffaf0;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.25);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.history-list {
+  max-height: 540rpx;
+}
+
+.history-item {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.history-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.history-label {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.history-sub {
+  font-size: 22rpx;
+  color: #777;
+}
+
+.history-actions {
+  display: flex;
+  gap: 16rpx;
 }

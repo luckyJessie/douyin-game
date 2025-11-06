@@ -7,22 +7,40 @@ const DIRECTIONS = [
 
 const DEFAULT_OPTIONS = {
   boardSize: 15,
-  maxDepth: 2,
-  maxCandidates: 16
+  maxDepth: 3,
+  maxCandidates: 16,
+  strategy: 'negamax',
+  simulations: 48,
+  playoutDepth: 36
 };
 
 export default class GomokuAI {
   constructor(options = {}) {
-    const merged = { ...DEFAULT_OPTIONS, ...options };
-    this.boardSize = merged.boardSize;
-    this.maxDepth = merged.maxDepth;
-    this.maxCandidates = merged.maxCandidates;
     this.winScore = 1_000_000;
+    this.applyOptions({ ...DEFAULT_OPTIONS, ...options });
+  }
+
+  applyOptions(options) {
+    this.boardSize = options.boardSize;
+    this.maxDepth = options.maxDepth;
+    this.maxCandidates = options.maxCandidates;
+    this.strategy = options.strategy;
+    this.simulations = options.simulations;
+    this.playoutDepth = options.playoutDepth;
+  }
+
+  setOptions(options = {}) {
+    this.applyOptions({ ...DEFAULT_OPTIONS, ...options });
   }
 
   bestMove(board, aiPlayer = -1) {
-    this.aiPlayer = aiPlayer;
+    if (this.strategy === 'mcts') {
+      return this.mctsBestMove(board, aiPlayer);
+    }
+    return this.negamaxBestMove(board, aiPlayer);
+  }
 
+  negamaxBestMove(board, aiPlayer) {
     const moves = this.generateMoves(board, aiPlayer);
     if (!moves.length) {
       return null;
@@ -87,6 +105,70 @@ export default class GomokuAI {
 
   evaluate(board, player) {
     return this.scoreBoard(board, player) - this.scoreBoard(board, -player);
+  }
+
+  mctsBestMove(board, aiPlayer) {
+    const candidates = this.generateMoves(board, aiPlayer);
+    if (!candidates.length) {
+      return null;
+    }
+
+    const simulations = Math.max(1, Math.round(this.simulations || 1));
+    let best = null;
+
+    for (const move of candidates) {
+      let wins = 0;
+      for (let i = 0; i < simulations; i += 1) {
+        const result = this.randomPlayout(board, move, aiPlayer);
+        if (result === aiPlayer) {
+          wins += 1;
+        } else if (result === 0) {
+          wins += 0.5;
+        }
+      }
+      const winRate = wins / simulations;
+      if (!best || winRate > best.score) {
+        best = { x: move.x, y: move.y, score: winRate };
+      }
+    }
+
+    return best;
+  }
+
+  randomPlayout(board, initialMove, aiPlayer) {
+    const tempBoard = this.cloneBoard(board);
+    tempBoard[initialMove.y][initialMove.x] = aiPlayer;
+
+    if (this.isWin(tempBoard, initialMove.x, initialMove.y, aiPlayer)) {
+      return aiPlayer;
+    }
+
+    let currentPlayer = -aiPlayer;
+    let steps = 0;
+    const maxSteps = Math.min(this.playoutDepth, this.boardSize * this.boardSize - this.countStones(tempBoard));
+
+    while (steps < maxSteps) {
+      let moves = this.generateMoves(tempBoard, currentPlayer);
+      if (!moves.length) {
+        moves = this.collectEmptyCells(tempBoard);
+      }
+
+      if (!moves.length) {
+        return 0;
+      }
+
+      const choice = moves[Math.floor(Math.random() * moves.length)];
+      tempBoard[choice.y][choice.x] = currentPlayer;
+
+      if (this.isWin(tempBoard, choice.x, choice.y, currentPlayer)) {
+        return currentPlayer;
+      }
+
+      currentPlayer = -currentPlayer;
+      steps += 1;
+    }
+
+    return 0;
   }
 
   scoreBoard(board, player) {
@@ -208,6 +290,18 @@ export default class GomokuAI {
     return moves;
   }
 
+  collectEmptyCells(board) {
+    const cells = [];
+    for (let y = 0; y < this.boardSize; y += 1) {
+      for (let x = 0; x < this.boardSize; x += 1) {
+        if (board[y][x] === 0) {
+          cells.push({ x, y });
+        }
+      }
+    }
+    return cells;
+  }
+
   hasNeighbor(board, x, y, distance) {
     for (let dy = -distance; dy <= distance; dy += 1) {
       for (let dx = -distance; dx <= distance; dx += 1) {
@@ -306,5 +400,19 @@ export default class GomokuAI {
 
   isInside(x, y) {
     return x >= 0 && x < this.boardSize && y >= 0 && y < this.boardSize;
+  }
+
+  cloneBoard(board) {
+    return board.map(row => row.slice());
+  }
+
+  countStones(board) {
+    let total = 0;
+    for (let y = 0; y < this.boardSize; y += 1) {
+      for (let x = 0; x < this.boardSize; x += 1) {
+        if (board[y][x] !== 0) total += 1;
+      }
+    }
+    return total;
   }
 }
