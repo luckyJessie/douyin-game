@@ -58,12 +58,18 @@ Page({
       totalTime: totalTime
     })
 
-    // 只在双人对战模式下启动倒计时
-    if (this.data.gameMode === 'pvp' && !this.data.gameOver) {
+    // 在玩家回合时启动倒计时（双人对战或人机对战）
+    if (!this.data.gameOver && this.data.currentPlayer === 1) {
       const that = this
       const interval = setInterval(() => {
         // 检查游戏是否已结束
         if (that.data.gameOver) {
+          that.clearTimer()
+          return
+        }
+        
+        // 检查是否还是玩家回合（防止在AI思考时继续倒计时）
+        if (that.data.currentPlayer !== 1) {
           that.clearTimer()
           return
         }
@@ -91,7 +97,7 @@ Page({
 
   // 超时自动落子
   autoMove() {
-    if (this.data.gameOver || this.data.gameMode !== 'pvp') {
+    if (this.data.gameOver || this.data.currentPlayer !== 1) {
       return
     }
 
@@ -262,8 +268,8 @@ Page({
       }, 500)
     }
     
-    // 双人对战模式，启动倒计时
-    if (this.data.gameMode === 'pvp') {
+    // 如果是玩家回合，启动倒计时
+    if (this.data.currentPlayer === 1) {
       this.startTimer()
     }
   },
@@ -369,8 +375,8 @@ Page({
       gameStatus: nextStatus
     })
 
-    // 如果是双人对战，启动倒计时
-    if (this.data.gameMode === 'pvp' && !this.data.gameOver) {
+    // 如果是玩家回合，启动倒计时
+    if (this.data.currentPlayer === 1 && !this.data.gameOver) {
       this.startTimer()
     }
 
@@ -509,8 +515,8 @@ Page({
         gameStatus: nextStatus
       })
 
-      // 如果是双人对战，重新启动倒计时
-      if (this.data.gameMode === 'pvp') {
+      // 如果是玩家回合，重新启动倒计时
+      if (this.data.currentPlayer === 1) {
         this.startTimer()
       }
     } else if (moveHistory.length === 1) {
@@ -525,8 +531,8 @@ Page({
         gameStatus: this.data.gameMode === 'pvp' ? '玩家1回合' : '玩家回合'
       })
 
-      // 如果是双人对战，重新启动倒计时
-      if (this.data.gameMode === 'pvp') {
+      // 如果是玩家回合，重新启动倒计时
+      if (this.data.currentPlayer === 1) {
         this.startTimer()
       }
     }

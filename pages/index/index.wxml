@@ -13,8 +13,8 @@
       </view>
     </view>
     <!-- 倒计时显示 -->
-    <view class="timer-container" wx:if="{{!gameOver && gameMode === 'pvp'}}">
-      <view class="timer-text">{{currentPlayer === 1 ? '玩家1' : '玩家2'}}剩余时间：{{timeLeft}}秒</view>
+    <view class="timer-container" wx:if="{{!gameOver && currentPlayer === 1}}">
+      <view class="timer-text">剩余时间：{{timeLeft}}秒</view>
       <view class="timer-bar">
         <view class="timer-progress" style="width: {{timeProgress}}%"></view>
       </view>
