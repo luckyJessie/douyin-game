@@ -1,0 +1,56 @@
+<view class="home">
+  <view class="hero">
+    <text class="title">五子棋对弈</text>
+    <text class="subtitle">选择模式与难度后开始游戏</text>
+  </view>
+
+  <view class="mode-section">
+    <text class="section-title">选择对弈模式</text>
+    <view class="mode-options">
+      <view
+        class="mode-card {{selectedMode === 'local' ? 'active' : ''}}"
+        data-mode="local"
+        bindtap="handleModeChange"
+      >
+        <view class="mode-label">本地人机</view>
+        <text class="mode-desc">与 AI 对弈，支持悔棋、落子提示与难度调节。</text>
+      </view>
+      <view
+        class="mode-card {{selectedMode === 'online' ? 'active' : ''}}"
+        data-mode="online"
+        bindtap="handleModeChange"
+      >
+        <view class="mode-label">在线对战</view>
+        <text class="mode-desc">创建或加入房间，与好友实时落子对弈。</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="settings" wx:if="{{selectedMode === 'local'}}">
+    <text class="section-title">本地对弈设置</text>
+    <view class="setting-group">
+      <text class="setting-label">难度档位</text>
+      <picker mode="selector" range="{{difficultyOptions}}" value="{{difficultyIndex}}" bindchange="handleDifficultyChange">
+        <view class="picker-display">{{difficultyOptions[difficultyIndex]}}</view>
+      </picker>
+    </view>
+    <view class="setting-group">
+      <text class="setting-label">先手执子</text>
+      <radio-group class="radio-group" bindchange="handleFirstMoveChange">
+        <label class="radio-item">
+          <radio value="player" checked="{{playerFirst === 'player'}}"/> 玩家
+        </label>
+        <label class="radio-item">
+          <radio value="ai" checked="{{playerFirst === 'ai'}}"/> AI
+        </label>
+      </radio-group>
+    </view>
+  </view>
+
+  <view class="settings" wx:if="{{selectedMode === 'online'}}">
+    <text class="section-title">在线对战提示</text>
+    <text class="tips">进入游戏后可创建新房间或输入房间号加入，需要在微信开发者工具中提前配置云开发环境与 rooms 集合。</text>
+  </view>
+
+  <button class="start-btn" loading="{{loading}}" disabled="{{loading}}" bindtap="startGame">开始对弈</button>
+</view>

@@ -1,3 +1,5 @@
+const { DIFFICULTY_SETTINGS } = require('../../utils/settings');
+
 const BOARD_SIZE = 15;
 const CELL_COUNT = BOARD_SIZE * BOARD_SIZE;
 const SEGMENT_SIZE = 64;
@@ -27,18 +29,26 @@ const PATTERN_SCORES = {
   single: 10
 };
 
-const DIFFICULTY_SETTINGS = [
-  { label: '初级', depth: 1, candidateLimit: 8, method: 'minimax', mctsIterations: 0 },
-  { label: '中级', depth: 2, candidateLimit: 12, method: 'minimax', mctsIterations: 0 },
-  { label: '高级', depth: 3, candidateLimit: 14, method: 'minimax', mctsIterations: 0 },
-  { label: '大师', depth: 2, candidateLimit: 16, method: 'mcts', mctsIterations: 1400 }
+const STAR_POINTS = [
+  { row: 3, col: 3 },
+  { row: 3, col: BOARD_SIZE - 4 },
+  { row: BOARD_SIZE - 4, col: 3 },
+  { row: BOARD_SIZE - 4, col: BOARD_SIZE - 4 },
+  { row: Math.floor(BOARD_SIZE / 2), col: Math.floor(BOARD_SIZE / 2) }
 ];
+
+const STAR_POINT_MAP = STAR_POINTS.reduce((acc, point) => {
+  acc[`${point.row}-${point.col}`] = true;
+  return acc;
+}, {});
 
 const LINES = computeLines();
 
 Page({
   data: {
     board: createEmptyBoard(),
+    boardSize: BOARD_SIZE,
+    starPointsMap: STAR_POINT_MAP,
     isPlayerTurn: true,
     gameOver: false,
     message: '玩家先手，请落子',
@@ -46,7 +56,6 @@ Page({
     playerFirst: true,
     hintMove: null,
     canUndo: false,
-    difficultyOptions: DIFFICULTY_SETTINGS.map(item => item.label),
     difficultyIndex: 1,
     difficultyLabel: DIFFICULTY_SETTINGS[1].label,
     isOnlineMode: false,
@@ -60,7 +69,7 @@ Page({
     HUMAN_PLAYER
   },
 
-  async onLoad() {
+  async onLoad(options) {
     this.bitboards = createEmptyBitboards();
     this.history = [];
     this.roomWatcher = null;
@@ -68,6 +77,31 @@ Page({
     this.onlinePlayerRole = 'black';
     this.db = null;
     this.cloudInited = false;
+
+    const mode = options && options.mode === 'online' ? 'online' : 'local';
+    let difficultyIndex = Number(options && options.difficulty);
+    if (!Number.isInteger(difficultyIndex) || difficultyIndex < 0 || difficultyIndex >= DIFFICULTY_SETTINGS.length) {
+      difficultyIndex = 1;
+    }
+    const playerFirst = options && options.first === 'ai' ? false : true;
+
+    this.data.isOnlineMode = mode === 'online';
+    this.data.difficultyIndex = difficultyIndex;
+    this.data.difficultyLabel = DIFFICULTY_SETTINGS[difficultyIndex].label;
+    this.data.playerFirst = playerFirst;
+
+    this.setData({
+      isOnlineMode: this.data.isOnlineMode,
+      difficultyIndex: this.data.difficultyIndex,
+      difficultyLabel: this.data.difficultyLabel,
+      playerFirst: this.data.playerFirst,
+      isPlayerTurn: this.data.isOnlineMode ? false : this.data.playerFirst,
+      hintMove: null,
+      canUndo: false,
+      onlineMessage: this.data.isOnlineMode ? '请选择「创建房间」或输入房间号加入' : '模式已切换为本地对弈',
+      message: this.data.isOnlineMode ? '请创建或加入在线房间' : (this.data.playerFirst ? '玩家先手，请落子' : 'AI先手，AI 正在落子...')
+    });
+
     await this.resetGame();
   },
 
@@ -305,49 +339,16 @@ Page({
     });
   },
 
-  handleDifficultyChange(event) {
-    if (this.data.isOnlineMode) {
-      return;
+  async returnToLobby() {
+    if (this.data.isOnlineMode && this.data.onlineRoomId) {
+      await this.leaveRoom({ silent: true });
     }
-    const index = Number(event.detail.value) || 0;
-    const settings = getCurrentDifficulty(index);
-    this.setData({
-      difficultyIndex: index,
-      difficultyLabel: settings.label,
-      message: `难度已切换为「${settings.label}」，当前轮到${this.data.isPlayerTurn ? '你' : 'AI'}落子`
-    });
-  },
-
-  switchToLocal() {
-    if (!this.data.isOnlineMode) {
-      return;
+    const stack = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+    if (stack && stack.length > 1) {
+      wx.navigateBack({ delta: 1 });
+    } else {
+      wx.reLaunch({ url: '/pages/home/home' });
     }
-    this.leaveRoom({ silent: true }).finally(() => {
-      this.setData({
-        isOnlineMode: false,
-        onlineMessage: '模式已切换为本地对弈',
-        joinRoomCode: ''
-      });
-      this.resetGame();
-    });
-  },
-
-  switchToOnline() {
-    if (this.data.isOnlineMode) {
-      return;
-    }
-    this.setData({
-      isOnlineMode: true,
-      onlineMessage: '请选择「创建房间」或输入房间号加入',
-      message: '请创建或加入在线房间',
-      isPlayerTurn: false,
-      hintMove: null,
-      canUndo: false
-    });
-    this.history = [];
-    this.bitboards = createEmptyBitboards();
-    this.onlinePlayerRole = 'black';
-    this.resetGame();
   },
 
   async createRoom() {
