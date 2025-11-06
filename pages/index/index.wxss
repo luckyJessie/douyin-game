@@ -1,0 +1,25 @@
+.status {
+  margin-bottom: 24rpx;
+  font-size: 32rpx;
+  color: #333333;
+}
+
+.board-canvas {
+  width: 650rpx;
+  height: 650rpx;
+  background-color: #f2c97d;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+}
+
+.info-panel {
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  color: #555555;
+  display: flex;
+  gap: 48rpx;
+}
+
+.controls {
+  margin-top: 32rpx;
+}

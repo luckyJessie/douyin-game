@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="status">{{message}}</view>
+  <canvas
+    canvas-id="boardCanvas"
+    bindtap="handleTap"
+    disable-scroll="true"
+    class="board-canvas">
+  </canvas>
+  <view class="info-panel">
+    <view>执黑：玩家</view>
+    <view>执白：AI</view>
+  </view>
+  <view class="controls">
+    <button type="primary" size="default" bindtap="resetGame">重新开始</button>
+  </view>
+</view>
