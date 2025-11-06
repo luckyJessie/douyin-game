@@ -7,7 +7,16 @@ Page({
     cellSize: 0,
     isGameOver: false,
     currentPlayer: 1,
-    message: '轮到你执黑落子'
+    message: '轮到你执黑落子',
+    difficultyLevels: [
+      { label: '入门', desc: '浅层搜索（深度 1），快速响应', maxDepth: 1, maxCandidates: 6, useIterativeDeepening: false, timeLimit: 0 },
+      { label: '标准', desc: '中等搜索（深度 3），攻守均衡', maxDepth: 3, maxCandidates: 10, useIterativeDeepening: false, timeLimit: 0 },
+      { label: '高手', desc: '深层搜索（深度 4）+ 迭代加深', maxDepth: 4, maxCandidates: 16, useIterativeDeepening: true, timeLimit: 900 }
+    ],
+    difficultyIndex: 1,
+    moveList: [],
+    historyRecords: [],
+    useIterativeDeepening: false
   },
 
   onLoad() {
@@ -18,7 +27,10 @@ Page({
     this.lastMove = null;
     this.canvasRect = null;
     this.ctx = null;
+    this.currentMoves = [];
     this.aiEngine = new GomokuAI(this.data.boardSize, this.humanStone, this.aiStone, 3);
+    this._applyDifficulty(this.data.difficultyIndex);
+    this._loadHistoryRecords();
   },
 
   onReady() {
@@ -51,7 +63,15 @@ Page({
     const size = this.data.boardSize;
     this.board = new Array(size).fill(0).map(() => new Array(size).fill(0));
     this.lastMove = null;
+    this.currentMoves = [];
     this.aiEngine.boardSize = size;
+    if (this.aiEngine && typeof this.aiEngine.ensureZobrist === 'function') {
+      this.aiEngine.ensureZobrist(size);
+    }
+    if (this.aiEngine && typeof this.aiEngine.resetCache === 'function') {
+      this.aiEngine.resetCache();
+    }
+    this.setData({ moveList: [] });
   },
 
   _render() {
@@ -170,12 +190,12 @@ Page({
     this._render();
 
     if (this._checkWinner(row, col, this.humanStone)) {
-      this._endGame('你赢了！恭喜！');
+      this._endGame('你赢了！恭喜！', 'human');
       return;
     }
 
     if (this._isBoardFull()) {
-      this._endGame('棋盘已满，平局！');
+      this._endGame('棋盘已满，平局！', 'draw');
       return;
     }
 
@@ -192,7 +212,7 @@ Page({
     const move = this.aiEngine.searchBestMove(this.board);
 
     if (!move) {
-      this._endGame('棋盘已满，平局！');
+      this._endGame('棋盘已满，平局！', 'draw');
       return;
     }
 
@@ -201,12 +221,12 @@ Page({
     this._render();
 
     if (this._checkWinner(move.row, move.col, this.aiStone)) {
-      this._endGame('AI获胜，下次再接再厉！');
+      this._endGame('AI获胜，下次再接再厉！', 'ai');
       return;
     }
 
     if (this._isBoardFull()) {
-      this._endGame('棋盘已满，平局！');
+      this._endGame('棋盘已满，平局！', 'draw');
       return;
     }
 
@@ -216,8 +236,156 @@ Page({
     });
   },
 
-  _placeStone(row, col, player) {
+  _placeStone(row, col, player, options = {}) {
     this.board[row][col] = player;
+    if (options.record !== false) {
+      this._recordMove(row, col, player);
+    }
+  },
+
+  _recordMove(row, col, player) {
+    if (!this.currentMoves) {
+      this.currentMoves = [];
+    }
+
+    const move = this._formatMove(row, col, player);
+    this.currentMoves.push(move);
+    this.setData({ moveList: this.currentMoves.slice(0) });
+  },
+
+  _formatMove(row, col, player) {
+    const playerLabel = player === this.humanStone ? '黑' : '白';
+    const coord = `${this._columnLabel(col)}${row + 1}`;
+    return {
+      row,
+      col,
+      player,
+      playerLabel,
+      coord
+    };
+  },
+
+  _columnLabel(col) {
+    const startCharCode = 'A'.charCodeAt(0);
+    if (col < 26) {
+      return String.fromCharCode(startCharCode + col);
+    }
+    const first = Math.floor(col / 26) - 1;
+    const second = col % 26;
+    return `${String.fromCharCode(startCharCode + first)}${String.fromCharCode(startCharCode + second)}`;
+  },
+
+  _applyDifficulty(index) {
+    const presets = this.data.difficultyLevels || [];
+    const preset = presets[index] || presets[0];
+    if (!preset || !this.aiEngine) return;
+
+    if (typeof this.aiEngine.configure === 'function') {
+      this.aiEngine.configure({
+        maxDepth: preset.maxDepth,
+        maxCandidates: preset.maxCandidates,
+        useIterativeDeepening: preset.useIterativeDeepening,
+        timeLimit: preset.timeLimit
+      });
+    } else {
+      this.aiEngine.maxDepth = preset.maxDepth;
+      this.aiEngine.maxCandidates = preset.maxCandidates;
+      this.aiEngine.useIterativeDeepening = preset.useIterativeDeepening;
+      this.aiEngine.timeLimit = preset.timeLimit;
+    }
+
+    this.setData({
+      difficultyIndex: index,
+      useIterativeDeepening: !!preset.useIterativeDeepening
+    });
+  },
+
+  onDifficultyChange(e) {
+    const index = Number(e.detail.value);
+    if (Number.isNaN(index)) return;
+    this._applyDifficulty(index);
+    if (this.data.isGameOver) return;
+    const preset = this.data.difficultyLevels[index] || this.data.difficultyLevels[0];
+    const turnMessage = this.data.currentPlayer === this.humanStone ? '轮到你执黑落子' : 'AI思考中...';
+    this.setData({
+      message: `已切换至${preset.label}难度，${turnMessage}`
+    });
+  },
+
+  _loadHistoryRecords() {
+    try {
+      const history = wx.getStorageSync('gomoku_history') || [];
+      const normalized = history.map(item => {
+        const steps = item.steps || (item.moves ? item.moves.length : 0);
+        return {
+          ...item,
+          steps,
+          title: item.title || this._formatResultTitle(item.result, steps),
+          createdAtText: item.createdAtText || this._formatTimestamp(item.createdAt || Date.now())
+        };
+      });
+      this.setData({ historyRecords: normalized });
+    } catch (err) {
+      console.warn('加载历史棋谱失败', err);
+      this.setData({ historyRecords: [] });
+    }
+  },
+
+  _saveHistoryRecord(result, message) {
+    if (!this.currentMoves || this.currentMoves.length === 0) return;
+    let history = [];
+    try {
+      history = wx.getStorageSync('gomoku_history') || [];
+    } catch (err) {
+      console.warn('读取历史棋谱失败', err);
+    }
+
+    const timestamp = Date.now();
+    const record = {
+      id: timestamp,
+      result,
+      message,
+      moves: this.currentMoves.slice(0),
+      steps: this.currentMoves.length,
+      createdAt: timestamp,
+      createdAtText: this._formatTimestamp(timestamp),
+      title: this._formatResultTitle(result, this.currentMoves.length)
+    };
+
+    history.unshift(record);
+    if (history.length > 12) {
+      history = history.slice(0, 12);
+    }
+
+    try {
+      wx.setStorageSync('gomoku_history', history);
+    } catch (err) {
+      console.warn('保存历史棋谱失败', err);
+    }
+
+    this.setData({ historyRecords: history });
+  },
+
+  _formatResultTitle(result, steps) {
+    let label = '平局';
+    if (result === 'human') {
+      label = '玩家胜';
+    } else if (result === 'ai') {
+      label = 'AI胜';
+    }
+    return `${label} · ${steps}手`;
+  },
+
+  _formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const pad = value => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  },
+
+  clearHistory() {
+    wx.removeStorageSync('gomoku_history');
+    this.setData({ historyRecords: [] });
+    wx.showToast({ title: '历史已清空', icon: 'none' });
   },
 
   _checkWinner(row, col, player) {
@@ -281,10 +449,11 @@ Page({
     });
   },
 
-  _endGame(message) {
+  _endGame(message, result = 'draw') {
     this.setData({
       isGameOver: true,
       message
     });
+    this._saveHistoryRecord(result, message);
   }
 });
