@@ -9,10 +9,10 @@
 
   <view class="game-board">
     <view class="board" id="board">
-      <view class="row" wx:for="{{board}}" wx:key="rowIndex">
+      <view class="row" wx:for="{{board}}" wx:for-index="rowIndex" wx:for-item="row" wx:key="rowIndex">
         <view 
-          class="cell {{item[cellIndex] === 1 ? 'black' : item[cellIndex] === 2 ? 'white' : ''}}"
-          wx:for="{{item}}" 
+          class="cell {{row[cellIndex] === 1 ? 'black' : row[cellIndex] === 2 ? 'white' : ''}}"
+          wx:for="{{row}}" 
           wx:for-item="cell"
           wx:for-index="cellIndex"
           wx:key="cellIndex"
@@ -20,7 +20,7 @@
           data-col="{{cellIndex}}"
           bindtap="onCellTap"
         >
-          <view class="piece" wx:if="{{item[cellIndex] !== 0}}"></view>
+          <view class="piece" wx:if="{{row[cellIndex] !== 0}}"></view>
         </view>
       </view>
     </view>
