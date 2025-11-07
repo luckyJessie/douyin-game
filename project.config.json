@@ -1,0 +1,13 @@
+{
+  "description": "豆芽五子棋小程序",
+  "appid": "touristappid",
+  "compileType": "miniProgram",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "enhance": true
+  },
+  "condition": {}
+}

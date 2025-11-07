@@ -1,0 +1,51 @@
+<view class="container">
+  <view class="hero soy-brand-gradient">
+    <view class="brand">
+      <text class="brand-badge">豆芽</text>
+      <text class="brand-title">五子棋对弈</text>
+    </view>
+    <text class="brand-slogan">轻松匹配好友，随时随地畅享对弈乐趣</text>
+  </view>
+
+  <view class="status-card">
+    <view class="status-row">
+      <text class="status-label">当前执子：</text>
+      <view class="status-player {{currentPlayer}}">{{currentPlayer === 'black' ? '黑棋' : '白棋'}}</view>
+    </view>
+    <view class="status-row">
+      <text class="status-label">对局状态：</text>
+      <text class="status-text">{{statusText}}</text>
+    </view>
+    <view class="status-actions">
+      <button class="btn-primary" bindtap="handleRestart">重新开局</button>
+      <button class="btn-secondary" bindtap="handleUndo" disabled="{{!canUndo}}">悔棋</button>
+    </view>
+  </view>
+
+  <view class="board-wrapper">
+    <view class="board">
+      <block wx:for="{{board}}" wx:for-index="rowIndex" wx:key="row-index">
+        <view class="board-row">
+          <block wx:for="{{item}}" wx:for-index="colIndex" wx:key="col-index">
+            <view
+              class="cell {{(lastMove && lastMove.row === rowIndex && lastMove.col === colIndex) ? 'cell-highlight' : ''}}"
+              data-row="{{rowIndex}}"
+              data-col="{{colIndex}}"
+              bindtap="handleCellTap"
+            >
+              <view wx:if="{{item === 'black'}}" class="piece black"></view>
+              <view wx:elif="{{item === 'white'}}" class="piece white"></view>
+            </view>
+          </block>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="tips-card">
+    <text class="tips-title">豆芽比赛小贴士</text>
+    <text class="tips-item">· 黑棋先手，先连成五子即可取胜</text>
+    <text class="tips-item">· 点击棋盘交叉点落子，长按空白区域可快速移动棋盘</text>
+    <text class="tips-item">· 使用悔棋辅助功能，回溯一步寻找最佳解法</text>
+  </view>
+</view>

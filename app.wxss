@@ -1,0 +1,9 @@
+page {
+  background-color: #f7f7f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  color: #1a1a1a;
+}
+
+.soy-brand-gradient {
+  background: linear-gradient(135deg, #5c9dff 0%, #8de1d1 100%);
+}

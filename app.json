@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "豆芽五子棋",
+    "navigationBarBackgroundColor": "#1A1A1A",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F7F7F7",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
