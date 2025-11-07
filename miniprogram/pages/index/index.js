@@ -292,7 +292,7 @@ Page({
       aiThinking: false,
       currentTurn: 0,
       resultMessage: '平局',
-      resultIcon: '🤝'
+      resultIcon: '/assets/icons/draw.svg'
     });
   },
 
@@ -305,7 +305,7 @@ Page({
         aiThinking: false,
         currentTurn: 0,
         resultMessage: '你获胜了！',
-        resultIcon: '🏆'
+        resultIcon: '/assets/icons/win.svg'
       });
       return true;
     }
@@ -316,7 +316,7 @@ Page({
         aiThinking: false,
         currentTurn: 0,
         resultMessage: '电脑获胜',
-        resultIcon: '💥'
+        resultIcon: '/assets/icons/lose.svg'
       });
       return true;
     }
