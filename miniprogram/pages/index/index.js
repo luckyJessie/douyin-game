@@ -8,6 +8,15 @@ function createEmptyBoard(size) {
   return Array.from({ length: size }, () => Array(size).fill(0));
 }
 
+function computeDisplaySize(windowWidth) {
+  const width = windowWidth || 320;
+  const baseWidth = width * 0.92;
+  const maxWidth = (650 / 750) * width;
+  const minWidth = width * 0.7;
+  const target = Math.min(baseWidth, maxWidth);
+  return Math.round(Math.max(target, minWidth));
+}
+
 Page({
   data: {
     statusText: '准备开始，点击棋盘落子',
@@ -28,13 +37,24 @@ Page({
   },
 
   onLoad() {
+    const systemInfo = wx.getSystemInfoSync();
+    const displaySize = computeDisplaySize(systemInfo.windowWidth);
+    const pixelRatio = systemInfo.pixelRatio || 1;
+    const canvasPixelSize = displaySize;
+
     this.ai = createAI({ boardSize: BOARD_SIZE });
     this.humanRole = HUMAN_ROLE;
     this.aiRole = AI_ROLE;
-    this.pixelRatio = 1;
+    this.pixelRatio = pixelRatio;
+    this.canvasSize = displaySize;
     this.board = createEmptyBoard(BOARD_SIZE);
     this.currentRole = this.data.playerFirst ? this.humanRole : this.aiRole;
     this.stepsStack = [];
+
+    this.setData({
+      canvasDisplaySize: displaySize,
+      canvasPixelSize
+    });
   },
 
   onReady() {
@@ -51,24 +71,23 @@ Page({
         .select('.board')
         .boundingClientRect((rect) => {
           const systemInfo = wx.getSystemInfoSync();
-          const fallbackSize = Math.floor(systemInfo.windowWidth * 0.9);
-          const baseWidth = systemInfo.windowWidth * 0.92;
-          const maxWidth = (650 / 750) * systemInfo.windowWidth;
-          const displaySizeCandidate = Math.min(baseWidth, maxWidth);
-          this.canvasSize = rect && rect.width ? rect.width : displaySizeCandidate || fallbackSize || 320;
-          this.pixelRatio = systemInfo.pixelRatio || 1;
-          const canvasPixelSize = Math.max(
-            Math.floor(this.canvasSize * this.pixelRatio),
-            Math.floor(this.canvasSize)
-          );
-          this.setData({
-            canvasPixelSize,
-            canvasDisplaySize: this.canvasSize
-          });
-          this.ctx = wx.createCanvasContext('board', this);
-          if (this.pixelRatio !== 1) {
-            this.ctx.scale(this.pixelRatio, this.pixelRatio);
+          const pixelRatio = systemInfo.pixelRatio || 1;
+          const displaySize = rect && rect.width ? rect.width : this.canvasSize || computeDisplaySize(systemInfo.windowWidth);
+          this.canvasSize = Math.round(displaySize);
+          this.pixelRatio = pixelRatio;
+          const canvasPixelSize = this.canvasSize;
+
+          if (
+            this.data.canvasDisplaySize !== this.canvasSize ||
+            this.data.canvasPixelSize !== canvasPixelSize
+          ) {
+            this.setData({
+              canvasDisplaySize: this.canvasSize,
+              canvasPixelSize
+            });
           }
+
+          this.ctx = wx.createCanvasContext('board', this);
           this.padding = this.canvasSize * 0.05;
           this.gridGap = (this.canvasSize - this.padding * 2) / (BOARD_SIZE - 1);
           this.stoneRadius = this.gridGap * 0.42;
@@ -108,9 +127,8 @@ Page({
     ctx.fillRect(0, 0, this.canvasSize, this.canvasSize);
     ctx.restore();
 
-    const lineWidth = this.pixelRatio ? 1 / this.pixelRatio : 1;
     ctx.setStrokeStyle('#b98952');
-    ctx.setLineWidth(lineWidth);
+    ctx.setLineWidth(1);
     for (let i = 0; i < BOARD_SIZE; i += 1) {
       const pos = this.padding + i * this.gridGap;
       ctx.beginPath();
@@ -157,8 +175,7 @@ Page({
       ctx.save();
       ctx.beginPath();
       ctx.setStrokeStyle('#ff7f50');
-      const highlightWidth = this.pixelRatio ? 2 / this.pixelRatio : 2;
-      ctx.setLineWidth(highlightWidth);
+      ctx.setLineWidth(2);
       ctx.arc(cx, cy, this.gridGap * 0.2, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
@@ -179,9 +196,8 @@ Page({
       ctx.setShadow(2, 3, 6, 'rgba(0,0,0,0.35)');
     } else {
       ctx.setFillStyle('#f7f7f7');
-      const outlineWidth = this.pixelRatio ? 1 / this.pixelRatio : 1;
       ctx.setStrokeStyle('#d8d8d8');
-      ctx.setLineWidth(outlineWidth);
+      ctx.setLineWidth(1);
       ctx.setShadow(2, 3, 6, 'rgba(0,0,0,0.25)');
     }
     ctx.fill();
