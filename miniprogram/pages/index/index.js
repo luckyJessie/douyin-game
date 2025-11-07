@@ -23,7 +23,8 @@ Page({
     ],
     difficultyLabels: ['入门', '标准', '高手'],
     steps: [],
-    canvasPixelSize: 600
+    canvasPixelSize: 320,
+    canvasDisplaySize: 320
   },
 
   onLoad() {
@@ -41,7 +42,7 @@ Page({
       this.resetGame({ triggerAI: !this.data.playerFirst });
     });
   },
-
+  
   setupCanvas() {
     return new Promise((resolve) => {
       const query = wx.createSelectorQuery();
@@ -49,16 +50,20 @@ Page({
         .in(this)
         .select('.board')
         .boundingClientRect((rect) => {
-          const fallbackSize = 600;
-          this.canvasSize = rect && rect.width ? rect.width : fallbackSize;
           const systemInfo = wx.getSystemInfoSync();
+          const fallbackSize = Math.floor(systemInfo.windowWidth * 0.9);
+          const baseWidth = systemInfo.windowWidth * 0.92;
+          const maxWidth = (650 / 750) * systemInfo.windowWidth;
+          const displaySizeCandidate = Math.min(baseWidth, maxWidth);
+          this.canvasSize = rect && rect.width ? rect.width : displaySizeCandidate || fallbackSize || 320;
           this.pixelRatio = systemInfo.pixelRatio || 1;
           const canvasPixelSize = Math.max(
             Math.floor(this.canvasSize * this.pixelRatio),
             Math.floor(this.canvasSize)
           );
           this.setData({
-            canvasPixelSize
+            canvasPixelSize,
+            canvasDisplaySize: this.canvasSize
           });
           this.ctx = wx.createCanvasContext('board', this);
           if (this.pixelRatio !== 1) {

@@ -27,8 +27,6 @@
 }
 
 .board {
-  width: 650rpx;
-  height: 650rpx;
   border-radius: 16rpx;
   box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.25);
   margin-bottom: 32rpx;

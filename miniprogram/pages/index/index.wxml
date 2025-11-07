@@ -9,6 +9,7 @@
     canvas-id="board"
     bindtouchstart="handleTap"
     disable-scroll="true"
+    style="width: {{canvasDisplaySize}}px; height: {{canvasDisplaySize}}px;"
     width="{{canvasPixelSize}}"
     height="{{canvasPixelSize}}"
   ></canvas>
