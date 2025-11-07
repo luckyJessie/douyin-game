@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="header">
+    <text class="title">豆芽五子棋</text>
+    <text class="status">{{statusText}}</text>
+  </view>
+
+  <canvas
+    class="board"
+    canvas-id="board"
+    bindtouchstart="handleTap"
+    disable-scroll="true"
+    width="{{canvasPixelSize}}"
+    height="{{canvasPixelSize}}"
+  ></canvas>
+
+  <view class="controls">
+    <button size="mini" type="primary" bindtap="handleRestart">重新开始</button>
+    <button size="mini" bindtap="handleUndo" disabled="{{!canUndo || aiThinking}}">悔棋</button>
+    <button size="mini" bindtap="toggleFirst" disabled="{{!gameOver && steps.length > 0}}">{{playerFirst ? '玩家先手' : '电脑先手'}}</button>
+  </view>
+
+  <view class="difficulty">
+    <text>难度：{{difficulties[difficultyIndex].label}}</text>
+    <picker mode="selector" range="{{difficultyLabels}}" value="{{difficultyIndex}}" bindchange="handleDifficultyChange">
+      <view class="picker">{{difficultyLabels[difficultyIndex]}}</view>
+    </picker>
+  </view>
+
+  <view class="footer">
+    <text>提示：点击棋盘落子。电脑自动应对。</text>
+  </view>
+</view>
