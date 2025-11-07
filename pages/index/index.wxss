@@ -109,10 +109,10 @@
 }
 
 .board-wrapper {
-  background: #fdfdfd;
+  background: #f2d7a6;
   border-radius: 32rpx;
   padding: 32rpx;
-  box-shadow: inset 0 0 0 1rpx rgba(0, 0, 0, 0.04), 0 20rpx 40rpx rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 0 0 1rpx rgba(120, 78, 27, 0.12), 0 20rpx 40rpx rgba(120, 78, 27, 0.18);
 }
 
 .board {
@@ -128,10 +128,10 @@
 .cell {
   width: 42rpx;
   height: 42rpx;
-  border: 1rpx solid rgba(0, 0, 0, 0.12);
+  border: 1rpx solid rgba(120, 78, 27, 0.25);
   box-sizing: border-box;
   position: relative;
-  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.35) 0, rgba(255, 255, 255, 0) 70%);
+  background-color: rgba(242, 199, 139, 0.6);
 }
 
 .cell::after {
@@ -145,7 +145,7 @@
 }
 
 .cell-highlight {
-  background-color: rgba(92, 157, 255, 0.15);
+  background-color: rgba(92, 157, 255, 0.25);
 }
 
 .piece {
