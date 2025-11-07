@@ -30,9 +30,9 @@ class AI {
    */
   setDepthByDifficulty() {
     const depthConfig = {
-      'easy': { start: 2, mid: 2, end: 3 },
-      'medium': { start: 3, mid: 4, end: 5 },
-      'hard': { start: 3, mid: 5, end: 6 }
+      'easy': { start: 2, mid: 2, end: 2 },
+      'medium': { start: 2, mid: 3, end: 3 },
+      'hard': { start: 3, mid: 3, end: 4 }
     }
     const baseDepth = depthConfig[this.difficulty] || depthConfig.medium
 
@@ -116,9 +116,6 @@ class AI {
       return this.fullSearch()
     }
 
-    let bestMove = null
-    let bestValue = -Infinity
-
     // 4. 使用Alpha-Beta剪枝的Minimax算法
     // 对候选位置进行排序，优先搜索高价值位置
     const scoredMoves = moves.map(move => ({
@@ -127,7 +124,15 @@ class AI {
     }))
     scoredMoves.sort((a, b) => b.score - a.score)
 
-    for (let { move } of scoredMoves) {
+    // 限制搜索的前几个最佳位置（进一步优化）
+    const searchLimit = Math.min(scoredMoves.length, {
+      'easy': 5,
+      'medium': 8,
+      'hard': 12
+    }[this.difficulty] || 8)
+
+    for (let i = 0; i < searchLimit; i++) {
+      const { move } = scoredMoves[i]
       this.board[move.row][move.col] = this.aiPlayer
       
       const value = this.minimax(this.board, this.depth - 1, false, -Infinity, Infinity)
@@ -291,7 +296,7 @@ class AI {
 
     const moves = this.getValidMovesNearPieces(board)
     
-    // 对移动进行排序以提高剪枝效率
+    // 对移动进行排序以提高剪枝效率（简化版，减少计算）
     const scoredMoves = moves.map(move => ({
       move,
       score: isMaximizing 
@@ -299,11 +304,15 @@ class AI {
         : -this.quickEvaluate(board, move.row, move.col)
     }))
     scoredMoves.sort((a, b) => b.score - a.score)
+    
+    // 限制搜索的移动数量（根据深度和难度）
+    const maxMovesToSearch = depth > 2 ? Math.min(scoredMoves.length, 8) : scoredMoves.length
+    const movesToSearch = scoredMoves.slice(0, maxMovesToSearch)
 
     if (isMaximizing) {
       // AI回合，选择最大值
       let maxValue = -Infinity
-      for (let { move } of scoredMoves) {
+      for (let { move } of movesToSearch) {
         board[move.row][move.col] = this.aiPlayer
         
         const value = this.minimax(board, depth - 1, false, alpha, beta)
@@ -322,7 +331,7 @@ class AI {
     } else {
       // 人类回合，选择最小值
       let minValue = Infinity
-      for (let { move } of scoredMoves) {
+      for (let { move } of movesToSearch) {
         board[move.row][move.col] = this.humanPlayer
         
         const value = this.minimax(board, depth - 1, true, alpha, beta)
@@ -341,30 +350,26 @@ class AI {
     }
   }
 
-  // 增强的评估函数
+  // 增强的评估函数（简化版，提高性能）
   evaluate(board) {
     let score = 0
 
-    // 1. 基础连子评估
-    score += this.evaluateLines(board, this.aiPlayer) * 20
-    score -= this.evaluateLines(board, this.humanPlayer) * 20
+    // 1. 基础连子评估（简化）
+    score += this.evaluateLines(board, this.aiPlayer) * 15
+    score -= this.evaluateLines(board, this.humanPlayer) * 15
 
     // 2. 威胁评估（能形成五连的位置）
-    score += this.evaluateThreats(board, this.aiPlayer) * 200
-    score -= this.evaluateThreats(board, this.humanPlayer) * 200
+    score += this.evaluateThreats(board, this.aiPlayer) * 150
+    score -= this.evaluateThreats(board, this.humanPlayer) * 150
 
-    // 3. 复杂棋形评估（双三、双四等）
-    score += this.evaluateComplexShapes(board, this.aiPlayer) * 50
-    score -= this.evaluateComplexShapes(board, this.humanPlayer) * 50
+    // 3. 位置权重评估（简化）
+    score += this.evaluatePositionValue(board, this.aiPlayer) * 0.5
+    score -= this.evaluatePositionValue(board, this.humanPlayer) * 0.5
 
-    // 4. 位置权重评估
-    score += this.evaluatePositionValue(board, this.aiPlayer)
-    score -= this.evaluatePositionValue(board, this.humanPlayer)
-
-    // 5. 攻防平衡：如果玩家有威胁，加强防守权重
+    // 4. 攻防平衡：如果玩家有威胁，加强防守权重
     const humanThreats = this.evaluateThreats(board, this.humanPlayer)
     if (humanThreats > 0) {
-      score -= humanThreats * 50 // 防守权重
+      score -= humanThreats * 30 // 防守权重
     }
 
     return score
@@ -703,9 +708,10 @@ class AI {
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
         if (board[i][j] !== 0) {
-          // 查找周围2格内的空位
-          for (let di = -2; di <= 2; di++) {
-            for (let dj = -2; dj <= 2; dj++) {
+          // 查找周围1格内的空位（减少搜索范围）
+          for (let di = -1; di <= 1; di++) {
+            for (let dj = -1; dj <= 1; dj++) {
+              if (di === 0 && dj === 0) continue
               const ni = i + di
               const nj = j + dj
               const key = `${ni},${nj}`
@@ -731,8 +737,13 @@ class AI {
       moves.push({ row: center, col: center })
     }
 
-    // 限制搜索范围以提高性能（终局时扩大搜索范围）
-    const maxMoves = this.isEndgame ? 30 : 20
+    // 限制搜索范围以提高性能（根据难度调整）
+    const maxMoves = {
+      'easy': 10,
+      'medium': 15,
+      'hard': 20
+    }[this.difficulty] || 15
+    
     if (moves.length > maxMoves) {
       // 根据位置价值排序，选择最好的位置
       moves.sort((a, b) => {
