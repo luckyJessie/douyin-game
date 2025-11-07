@@ -153,8 +153,12 @@
   content: '';
   position: absolute;
   inset: 40rpx;
-  background: rgba(255, 255, 255, 0.08);
   border-radius: 12rpx;
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image:
+    linear-gradient(to right, rgba(53, 33, 14, 0.28) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(53, 33, 14, 0.28) 1px, transparent 1px);
+  background-size: calc(100% / 14) calc(100% / 14);
   pointer-events: none;
   z-index: 0;
 }
@@ -169,7 +173,6 @@
   z-index: 3;
 }
 
-.grid-layer,
 .stone-layer,
 .star-layer,
 .touch-layer {
@@ -179,37 +182,20 @@
   left: 40rpx;
   right: 40rpx;
   display: grid;
-  grid-template-columns: repeat(15, 1fr);
-  grid-template-rows: repeat(15, 1fr);
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  grid-template-rows: repeat(15, minmax(0, 1fr));
   pointer-events: none;
   z-index: 1;
 }
 
-.grid-line {
-  position: absolute;
-  background: rgba(53, 33, 14, 0.32);
-}
-
-.grid-line.horizontal {
-  left: 0;
-  right: 0;
-  height: 2rpx;
-  transform: translateY(-1rpx);
-}
-
-.grid-line.vertical {
-  top: 0;
-  bottom: 0;
-  width: 2rpx;
-  transform: translateX(-1rpx);
-}
-
 .stone-layer {
   z-index: 2;
+  pointer-events: none;
 }
 
 .star-layer {
   z-index: 2;
+  pointer-events: none;
 }
 
 .touch-layer {

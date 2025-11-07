@@ -40,15 +40,6 @@
   </view>
 
   <view class="board">
-    <view class="grid-layer">
-      <block wx:for="{{linePositions}}" wx:key="h-{{item}}">
-        <view class="grid-line horizontal" style="top: {{item}}%;"></view>
-      </block>
-      <block wx:for="{{linePositions}}" wx:key="v-{{item}}">
-        <view class="grid-line vertical" style="left: {{item}}%;"></view>
-      </block>
-    </view>
-
     <view class="star-layer">
       <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="star-row-{{rowIndex}}">
         <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="star-col-{{colIndex}}">

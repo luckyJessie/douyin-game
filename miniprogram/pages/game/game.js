@@ -42,8 +42,6 @@ const STAR_POINT_MAP = STAR_POINTS.reduce((acc, point) => {
   return acc;
 }, {});
 
-const LINE_POSITIONS = Array.from({ length: BOARD_SIZE }, (_, index) => ((index / (BOARD_SIZE - 1)) * 100).toFixed(4));
-
 const LINES = computeLines();
 
 Page({
@@ -52,7 +50,6 @@ Page({
     boardSize: BOARD_SIZE,
     starPointsMap: STAR_POINT_MAP,
     starPoints: STAR_POINTS,
-    linePositions: LINE_POSITIONS,
     isPlayerTurn: true,
     gameOver: false,
     message: '玩家先手，请落子',
