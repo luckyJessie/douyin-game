@@ -1,0 +1,15 @@
+{
+  "miniprogramRoot": "miniprogram/",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "appid": "touristappid",
+  "projectname": "gomoku-ai-mini-program",
+  "description": "微信小程序五子棋人机对弈示例",
+  "compileType": "miniprogram",
+  "condition": {}
+}

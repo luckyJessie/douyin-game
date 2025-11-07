@@ -1,0 +1,108 @@
+<view class="container">
+  <view class="status-panel">
+    <text class="message">{{message}}</text>
+    <view class="turn-indicator">
+      <text>{{isOnlineMode ? (onlineCanAct ? '当前：轮到你落子' : '当前：等待对手') : (isPlayerTurn ? '当前：玩家落子' : '当前：AI思考中')}}</text>
+      <text class="first-player" wx:if="{{!isOnlineMode}}">先手：{{playerFirst ? '玩家' : 'AI'}}</text>
+      <text class="first-player" wx:else>房间状态：{{onlineRoomId ? (onlineOpponentReady ? '对手已就绪' : '等待对手加入') : '待创建/加入房间'}}</text>
+    </view>
+  </view>
+
+  <view class="controls">
+    <view class="control-header">
+      <view class="control-summary">
+        <text class="tag mode">模式：{{isOnlineMode ? '在线对战' : '本地人机'}}</text>
+        <text class="tag" wx:if="{{!isOnlineMode}}">难度：{{difficultyLabel}}</text>
+        <text class="tag" wx:if="{{!isOnlineMode}}">先手：{{playerFirst ? '玩家' : 'AI'}}</text>
+      </view>
+      <button class="btn-link" size="mini" hover-class="none" bindtap="returnToLobby">重新选择模式</button>
+    </view>
+
+    <view class="control-actions" wx:if="{{!isOnlineMode}}">
+      <button class="btn-secondary" size="mini" bindtap="showHint">落子提示</button>
+      <button class="btn-secondary" size="mini" bindtap="undoMove" disabled="{{!canUndo}}">悔棋</button>
+    </view>
+
+    <view class="online-panel" wx:if="{{isOnlineMode}}">
+      <view class="room-info" wx:if="{{onlineRoomId}}">
+        <text>房间号：{{onlineRoomId}}</text>
+        <text>对手：{{onlineOpponentReady ? '已就绪' : '等待进入'}} </text>
+      </view>
+      <view class="room-actions" wx:if="{{!onlineRoomId}}">
+        <button class="btn-primary" size="mini" bindtap="createRoom" loading="{{onlineLoading}}">创建房间</button>
+        <input class="room-input" type="text" placeholder="输入房间号加入" value="{{joinRoomCode}}" bindinput="handleJoinRoomInput"/>
+        <button class="btn-secondary" size="mini" bindtap="joinRoom" loading="{{onlineLoading}}">加入房间</button>
+      </view>
+      <view class="online-status">
+        <text>{{onlineMessage}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="board">
+      <view class="star-layer">
+        <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="index">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="index">
+          <view class="star-cell">
+            <view wx:if="{{starPointsMap[rowIndex + '-' + colIndex]}}" class="star-dot"></view>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <view class="stone-layer">
+        <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="index">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="index">
+          <view class="stone-cell {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-cell' : ''}}">
+            <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
+            <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <view class="touch-layer">
+        <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="index">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="index">
+          <view
+            class="touch-cell {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
+            data-row="{{rowIndex}}"
+            data-col="{{colIndex}}"
+            bindtap="handleCellTap"
+          ></view>
+        </block>
+      </block>
+    </view>
+  </view>
+
+  <view class="legend">
+    <view class="legend-item">
+      <view class="piece player small"></view>
+      <text>{{isOnlineMode ? '黑方（执黑）' : '玩家（黑子）'}}</text>
+    </view>
+    <view class="legend-item">
+      <view class="piece ai small"></view>
+      <text>{{isOnlineMode ? '白方（执白）' : 'AI（白子）'}}</text>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button class="btn-primary" size="mini" bindtap="resetGame">重新开始</button>
+    <button class="btn-secondary" size="mini" bindtap="toggleFirstMove" wx:if="{{!isOnlineMode}}">切换先手</button>
+    <button class="btn-secondary" size="mini" bindtap="leaveRoom" wx:if="{{isOnlineMode && onlineRoomId}}">退出房间</button>
+  </view>
+
+    <view class="tips">
+      <text wx:if="{{!isOnlineMode}}">提示：落子提示会为你标出推荐的候选位置，难度越高思考越久但棋力更强；若需调整模式，可点击顶部“重新选择模式”。</text>
+      <text wx:else>提示：在线对战需要双方使用同一房间号进入，落子将通过云数据库同步；如需返回模式选择，请点击顶部按钮。</text>
+    </view>
+
+    <view class="toast" wx:if="{{winToast.visible}}" style="background: {{winToast.variant === 'player' ? 'linear-gradient(135deg, #2ecc71, #1abc9c)' : winToast.variant === 'ai' ? 'linear-gradient(135deg, #ff6b6b, #ff4757)' : 'linear-gradient(135deg, #4facfe, #00f2fe)'}};">
+      <view class="toast-icon">{{winToast.variant === 'player' ? '🎉' : winToast.variant === 'ai' ? '🤖' : '🤝'}}</view>
+      <view class="toast-content">
+        <text class="toast-title">{{winToast.title}}</text>
+        <text class="toast-message">{{winToast.message}}</text>
+      </view>
+      <button class="toast-action" size="mini" bindtap="handleToastAction">{{winToast.actionText}}</button>
+    </view>
+</view>
