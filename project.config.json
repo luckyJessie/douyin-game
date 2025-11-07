@@ -1,15 +1,18 @@
 {
-  "appid": "touristappid",
+  "appid": "wx0000000000000000",
   "projectname": "douya-gomoku",
-  "description": "豆芽五子棋小程序",
   "compileType": "miniprogram",
-  "libVersion": "2.74.0",
+  "libVersion": "3.4.0",
   "miniprogramRoot": "./",
   "setting": {
     "urlCheck": false,
     "es6": true,
+    "enhance": true,
     "postcss": true,
     "minified": true,
-    "enhance": true
-  }
+    "coverView": true,
+    "checkInvalidKey": true,
+    "checkSiteMap": true
+  },
+  "condition": {}
 }

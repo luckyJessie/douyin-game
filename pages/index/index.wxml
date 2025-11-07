@@ -5,19 +5,19 @@
   </view>
   <view class="board-wrapper">
     <view class="board">
-      <view
-        class="board-row"
-        tt:for="{{board}}"
-        tt:for-item="row"
-        tt:for-index="rowIndex"
-        tt:key="rowIndex"
-      >
+        <view
+          class="board-row"
+          wx:for="{{board}}"
+          wx:for-item="row"
+          wx:for-index="rowIndex"
+          wx:key="rowIndex"
+        >
         <view
           class="board-cell {{winnerMap[rowIndex + '-' + colIndex] ? 'board-cell--win' : ''}} {{lastMoveKey === rowIndex + '-' + colIndex ? 'board-cell--last' : ''}} {{status !== 'playing' ? 'board-cell--inactive' : ''}}"
-          tt:for="{{row}}"
-          tt:for-item="cell"
-          tt:for-index="colIndex"
-          tt:key="colIndex"
+          wx:for="{{row}}"
+          wx:for-item="cell"
+          wx:for-index="colIndex"
+          wx:key="colIndex"
           data-row="{{rowIndex}}"
           data-col="{{colIndex}}"
           bindtap="handleCellTap"
