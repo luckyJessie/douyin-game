@@ -37,22 +37,19 @@
       width="{{canvasPixelSize}}"
       height="{{canvasPixelSize}}"
     ></canvas>
-    <view wx:if="{{gameOver}}" class="result-banner {{resultType}} {{resultAnimation}}">
-      <image wx:if="{{resultIcon}}" class="result-icon" src="{{resultIcon}}" mode="aspectFit" />
+      <view wx:if="{{gameOver}}" class="result-banner {{resultType}} {{resultAnimation}}">
       <text class="result-text">{{resultMessage}}</text>
       <button class="result-button" size="mini" type="primary" bindtap="handleRestart">再来一局</button>
     </view>
   </view>
 
-  <view class="controls">
-    <button class="control-btn primary" size="mini" bindtap="handleRestart" disabled="{{aiThinking}}">
-      <image class="btn-icon" src="/assets/icons/restart.svg" mode="aspectFit" />
-      <text class="btn-label">重新开始</text>
-    </button>
-    <button class="control-btn" size="mini" bindtap="handleUndo" disabled="{{!canUndo || aiThinking}}">
-      <image class="btn-icon" src="/assets/icons/undo.svg" mode="aspectFit" />
-      <text class="btn-label">悔棋</text>
-    </button>
+    <view class="controls">
+      <button class="control-btn primary" size="mini" bindtap="handleRestart" disabled="{{aiThinking}}">
+        <text class="btn-label">重新开始</text>
+      </button>
+      <button class="control-btn" size="mini" bindtap="handleUndo" disabled="{{!canUndo || aiThinking}}">
+        <text class="btn-label">悔棋</text>
+      </button>
   </view>
 
   <view class="difficulty">

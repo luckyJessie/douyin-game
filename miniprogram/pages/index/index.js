@@ -48,7 +48,6 @@ Page({
     canvasDisplaySize: 320,
     currentTurn: HUMAN_ROLE,
     resultMessage: '',
-    resultIcon: '',
     resultType: '',
     resultAnimation: '',
     humanRoleConstant: HUMAN_ROLE,
@@ -131,7 +130,6 @@ Page({
       steps: [],
       currentTurn: this.humanRole,
       resultMessage: '',
-      resultIcon: '',
       resultType: '',
       resultAnimation: ''
     });
@@ -310,8 +308,7 @@ Page({
     this.triggerResult({
       type: 'draw',
       status: '平局',
-      message: '平局',
-      icon: '/assets/icons/draw.svg'
+      message: '平局'
     });
   },
 
@@ -321,8 +318,7 @@ Page({
       this.triggerResult({
         type: 'win',
         status: '恭喜，你赢了！',
-        message: '你获胜了！',
-        icon: '/assets/icons/win.svg'
+        message: '你获胜了！'
       });
       return true;
     }
@@ -330,8 +326,7 @@ Page({
       this.triggerResult({
         type: 'lose',
         status: '电脑获胜，再试一次吧',
-        message: '电脑获胜',
-        icon: '/assets/icons/lose.svg'
+        message: '电脑获胜'
       });
       return true;
     }
@@ -395,7 +390,6 @@ Page({
       gameOver: false,
       currentTurn: this.humanRole,
       resultMessage: '',
-      resultIcon: '',
       resultType: '',
       resultAnimation: ''
     });
@@ -545,7 +539,7 @@ Page({
     this.playEffect(this.loseAudio);
   },
 
-  triggerResult({ type, status, message, icon }) {
+  triggerResult({ type, status, message }) {
     const animation = RESULT_ANIMATIONS[type] || '';
     this.pauseBackgroundMusic();
     this.setData({
@@ -554,7 +548,6 @@ Page({
       aiThinking: false,
       currentTurn: 0,
       resultMessage: message,
-      resultIcon: icon,
       resultType: type,
       resultAnimation: animation
     });

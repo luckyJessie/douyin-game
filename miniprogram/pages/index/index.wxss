@@ -175,12 +175,6 @@
   animation: result-pulse 1.2s ease-in-out both;
 }
 
-.result-icon {
-  width: 140rpx;
-  height: 140rpx;
-  filter: drop-shadow(0 12rpx 36rpx rgba(0, 0, 0, 0.4));
-}
-
 .result-text {
   font-size: 50rpx;
   font-weight: 700;
@@ -340,12 +334,6 @@
 
 .control-btn::after {
   border: none;
-}
-
-.btn-icon {
-  width: 40rpx;
-  height: 40rpx;
-  display: block;
 }
 
 .btn-label {
