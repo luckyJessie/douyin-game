@@ -1,8 +1,9 @@
 <view class="container">
   <canvas
-    type="2d"
     canvas-id="board"
     class="board"
+    width="{{canvasSize}}"
+    height="{{canvasSize}}"
     style="width:{{canvasSize}}px;height:{{canvasSize}}px;"
     bindtouchend="handleTouch"
   ></canvas>
