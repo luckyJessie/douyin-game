@@ -35,6 +35,7 @@ Page({
     canvasDisplaySize: 320,
     currentTurn: HUMAN_ROLE,
     resultMessage: '',
+    resultIcon: '',
     humanRoleConstant: HUMAN_ROLE,
     aiRoleConstant: AI_ROLE
   },
@@ -113,7 +114,8 @@ Page({
       aiThinking: false,
       steps: [],
       currentTurn: this.humanRole,
-      resultMessage: ''
+      resultMessage: '',
+      resultIcon: ''
     });
     this.renderBoard();
   },
@@ -289,7 +291,8 @@ Page({
       gameOver: true,
       aiThinking: false,
       currentTurn: 0,
-      resultMessage: '平局'
+      resultMessage: '平局',
+      resultIcon: '🤝'
     });
   },
 
@@ -301,7 +304,8 @@ Page({
         gameOver: true,
         aiThinking: false,
         currentTurn: 0,
-        resultMessage: '你获胜了！'
+        resultMessage: '你获胜了！',
+        resultIcon: '🏆'
       });
       return true;
     }
@@ -311,7 +315,8 @@ Page({
         gameOver: true,
         aiThinking: false,
         currentTurn: 0,
-        resultMessage: '电脑获胜'
+        resultMessage: '电脑获胜',
+        resultIcon: '💥'
       });
       return true;
     }
@@ -374,7 +379,8 @@ Page({
       statusText: '轮到你了',
       gameOver: false,
       currentTurn: this.humanRole,
-      resultMessage: ''
+      resultMessage: '',
+      resultIcon: ''
     });
     this.renderBoard();
   },

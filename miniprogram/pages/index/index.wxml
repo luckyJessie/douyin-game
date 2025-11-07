@@ -3,13 +3,15 @@
     <text class="title">豆芽五子棋</text>
     <view class="players">
       <view class="player-card {{currentTurn === humanRoleConstant ? 'active' : ''}}">
+        <view class="player-token black"></view>
         <text class="player-name">玩家</text>
-        <text class="player-role">● 黑棋</text>
+        <text class="player-role">黑棋</text>
       </view>
       <view class="vs-tag">VS</view>
       <view class="player-card {{currentTurn === aiRoleConstant ? 'active' : ''}}">
+        <view class="player-token white"></view>
         <text class="player-name">电脑</text>
-        <text class="player-role">○ 白棋</text>
+        <text class="player-role">白棋</text>
       </view>
     </view>
     <text class="status">{{statusText}}</text>
@@ -26,14 +28,21 @@
       height="{{canvasPixelSize}}"
     ></canvas>
     <view wx:if="{{gameOver}}" class="result-banner">
+      <text class="result-icon">{{resultIcon}}</text>
       <text class="result-text">{{resultMessage}}</text>
       <button class="result-button" size="mini" type="primary" bindtap="handleRestart">再来一局</button>
     </view>
   </view>
 
   <view class="controls">
-    <button size="mini" type="primary" bindtap="handleRestart" disabled="{{aiThinking}}">重新开始</button>
-    <button size="mini" bindtap="handleUndo" disabled="{{!canUndo || aiThinking}}">悔棋</button>
+    <button class="control-btn primary" size="mini" bindtap="handleRestart" disabled="{{aiThinking}}">
+      <text class="btn-icon">🔄</text>
+      <text class="btn-label">重新开始</text>
+    </button>
+    <button class="control-btn" size="mini" bindtap="handleUndo" disabled="{{!canUndo || aiThinking}}">
+      <text class="btn-icon">↩️</text>
+      <text class="btn-label">悔棋</text>
+    </button>
   </view>
 
   <view class="difficulty">
