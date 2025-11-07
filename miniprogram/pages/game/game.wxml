@@ -40,9 +40,9 @@
   </view>
 
   <view class="board">
-    <view class="star-layer">
-      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="star-row-{{rowIndex}}">
-        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="star-col-{{colIndex}}">
+      <view class="star-layer">
+        <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="*this">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="*this">
           <view class="star-cell">
             <view wx:if="{{starPointsMap[rowIndex + '-' + colIndex]}}" class="star-dot"></view>
           </view>
@@ -51,8 +51,8 @@
     </view>
 
     <view class="stone-layer">
-      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="stone-row-{{rowIndex}}">
-        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="stone-col-{{colIndex}}">
+        <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="*this">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="*this">
           <view class="stone-cell {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-cell' : ''}}">
             <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
             <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
@@ -62,8 +62,8 @@
     </view>
 
     <view class="touch-layer">
-      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="touch-row-{{rowIndex}}">
-        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="touch-col-{{colIndex}}">
+        <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="*this">
+          <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="*this">
           <view
             class="touch-cell {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
             data-row="{{rowIndex}}"
