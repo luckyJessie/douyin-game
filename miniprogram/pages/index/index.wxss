@@ -308,28 +308,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 12rpx;
-  padding: 0 28rpx;
+  column-gap: 16rpx;
+  padding: 0 32rpx;
   height: 72rpx;
   border-radius: 40rpx;
-  background: linear-gradient(135deg, rgba(33, 40, 62, 0.85), rgba(23, 28, 44, 0.92));
-  color: #f7f9ff;
+  background: linear-gradient(135deg, #1f2030, #272a40);
+  color: #ffffff;
   font-size: 28rpx;
-  border: 1rpx solid rgba(104, 118, 155, 0.35);
-  box-shadow: 0 6rpx 20rpx rgba(9, 14, 30, 0.35);
+  border: 1rpx solid rgba(92, 104, 140, 0.4);
+  box-shadow: 0 6rpx 20rpx rgba(12, 16, 32, 0.35);
 }
 
 .control-btn text,
 .control-btn image {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .control-btn.primary {
-  background: linear-gradient(140deg, #6a11cb, #2575fc);
-  color: #f9fbff;
-  border-color: rgba(73, 115, 255, 0.45);
-  box-shadow: 0 12rpx 30rpx rgba(37, 117, 252, 0.35);
+  background: linear-gradient(140deg, #3b82f6, #9333ea);
+  color: #ffffff;
+  border-color: rgba(76, 115, 255, 0.4);
+  box-shadow: 0 12rpx 30rpx rgba(59, 130, 246, 0.35);
 }
 
 .control-btn:disabled {
