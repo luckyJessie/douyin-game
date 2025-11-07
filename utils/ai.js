@@ -151,6 +151,9 @@ class AI {
       'hard': 20
     }[this.difficulty] || 15)
 
+    let bestMove = null
+    let bestValue = -Infinity
+
     for (let i = 0; i < searchLimit; i++) {
       const { move } = scoredMoves[i]
       this.board[move.row][move.col] = this.aiPlayer
