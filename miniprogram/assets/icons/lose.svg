@@ -1,8 +1,15 @@
 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="60" cy="60" r="42" fill="#FFCDD2"/>
-  <path d="M36 36L84 84" stroke="#E53935" stroke-width="10" stroke-linecap="round"/>
-  <path d="M84 36L36 84" stroke="#E53935" stroke-width="10" stroke-linecap="round"/>
-  <circle cx="46" cy="50" r="6" fill="#E53935"/>
-  <circle cx="74" cy="50" r="6" fill="#E53935"/>
-  <path d="M44 78C48 72 52 70 60 70C68 70 72 72 76 78" stroke="#E53935" stroke-width="8" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="loseGradient" x1="34" y1="28" x2="92" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF9A9E"/>
+      <stop offset="1" stop-color="#F6416C"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="42" fill="url(#loseGradient)" opacity="0.18"/>
+  <circle cx="60" cy="60" r="38" stroke="url(#loseGradient)" stroke-width="6" opacity="0.55"/>
+  <path d="M44 46L52 54" stroke="url(#loseGradient)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M76 46L68 54" stroke="url(#loseGradient)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M42 78C46 72 50 70 60 70C70 70 74 72 78 78" stroke="url(#loseGradient)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M38 38L82 82" stroke="url(#loseGradient)" stroke-width="8" stroke-linecap="round" opacity="0.45"/>
+  <path d="M82 38L38 82" stroke="url(#loseGradient)" stroke-width="8" stroke-linecap="round" opacity="0.45"/>
 </svg>

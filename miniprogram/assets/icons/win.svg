@@ -1,9 +1,23 @@
 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="38" y="84" width="44" height="10" rx="5" fill="#FDD835"/>
-  <path d="M76 84V68C76 58.0589 84.0589 50 94 50H102" stroke="#FDD835" stroke-width="8" stroke-linecap="round"/>
-  <path d="M44 84V68C44 58.0589 35.9411 50 26 50H18" stroke="#FDD835" stroke-width="8" stroke-linecap="round"/>
-  <path d="M38 20H82V60C82 69.9411 73.9411 78 64 78H56C46.0589 78 38 69.9411 38 60V20Z" fill="#FFEE58"/>
-  <path d="M46 20H74V60C74 65.5228 69.5228 70 64 70H56C50.4772 70 46 65.5228 46 60V20Z" fill="#FBC02D"/>
-  <circle cx="60" cy="44" r="10" fill="#FFF9C4"/>
-  <path d="M60 32L62.4721 39.6279H70.4164L64.4721 44.0942L66.9443 51.7221L60 47.2558L53.0557 51.7221L55.5279 44.0942L49.5836 39.6279H57.5279L60 32Z" fill="#FFE082"/>
+  <defs>
+    <linearGradient id="winTop" x1="34" y1="16" x2="86" y2="74" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE28A"/>
+      <stop offset="0.5" stop-color="#FFC15E"/>
+      <stop offset="1" stop-color="#FF9A44"/>
+    </linearGradient>
+    <linearGradient id="winHandle" x1="16" y1="40" x2="102" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF2BF"/>
+      <stop offset="1" stop-color="#FFBC6B"/>
+    </linearGradient>
+    <linearGradient id="winBase" x1="44" y1="82" x2="76" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD26F"/>
+      <stop offset="1" stop-color="#FF9A44"/>
+    </linearGradient>
+  </defs>
+  <path d="M44 20H76C78.2091 20 80 21.7909 80 24V58C80 69.0457 71.0457 78 60 78C48.9543 78 40 69.0457 40 58V24C40 21.7909 41.7909 20 44 20Z" fill="url(#winTop)"/>
+  <path d="M32 32H40V48C40 56.8366 32.8366 64 24 64H18" stroke="url(#winHandle)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M88 32H80V48C80 56.8366 87.1634 64 96 64H102" stroke="url(#winHandle)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M48 82H72V90C72 94.4183 68.4183 98 64 98H56C51.5817 98 48 94.4183 48 90V82Z" fill="url(#winBase)"/>
+  <path d="M44 106H76" stroke="url(#winBase)" stroke-width="9" stroke-linecap="round" opacity="0.45"/>
+  <path d="M60 34L62.4721 41.6279H70.4164L63.4721 46.3442L65.9443 53.9721L60 49.2558L54.0557 53.9721L56.5279 46.3442L49.5836 41.6279H57.5279L60 34Z" fill="#FFF3CC"/>
 </svg>
