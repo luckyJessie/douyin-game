@@ -1,0 +1,46 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">豆芽五子棋</text>
+    <view class="status">
+      <text class="status-text">{{statusText}}</text>
+    </view>
+  </view>
+
+  <view class="game-board">
+    <view class="board" id="board">
+      <view class="row" wx:for="{{board}}" wx:key="rowIndex">
+        <view 
+          class="cell {{item[cellIndex] === 1 ? 'black' : item[cellIndex] === 2 ? 'white' : ''}}"
+          wx:for="{{item}}" 
+          wx:for-item="cell"
+          wx:for-index="cellIndex"
+          wx:key="cellIndex"
+          data-row="{{rowIndex}}"
+          data-col="{{cellIndex}}"
+          bindtap="onCellTap"
+        >
+          <view class="piece" wx:if="{{item[cellIndex] !== 0}}"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="controls">
+    <button class="btn" bindtap="resetGame">重新开始</button>
+    <button class="btn" bindtap="undoMove" disabled="{{!canUndo}}">悔棋</button>
+  </view>
+
+  <view class="info">
+    <view class="player-info">
+      <view class="player black-player">
+        <view class="player-piece black"></view>
+        <text>黑棋</text>
+      </view>
+      <view class="player white-player">
+        <view class="player-piece white"></view>
+        <text>白棋</text>
+      </view>
+    </view>
+  </view>
+</view>
