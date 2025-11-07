@@ -1,6 +1,9 @@
-const CLOUD_ENV_ID = '';
+const { CLOUD_ENV_ID } = require('./config/index.js');
 
 App({
+  globalData: {
+    cloudEnvId: CLOUD_ENV_ID
+  },
   onLaunch() {
     if (wx.cloud && CLOUD_ENV_ID) {
       try {
