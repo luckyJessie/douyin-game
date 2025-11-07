@@ -3,15 +3,25 @@
     <text class="title">豆芽五子棋</text>
     <view class="players">
       <view class="player-card {{currentTurn === humanRoleConstant ? 'active' : ''}}">
-        <view class="player-token black"></view>
-        <text class="player-name">玩家</text>
-        <text class="player-role black">黑棋</text>
+        <view class="player-row">
+          <view class="stone-icon black"></view>
+          <view class="player-meta">
+            <text class="player-name">玩家</text>
+            <text class="player-role">黑棋</text>
+          </view>
+        </view>
+        <text wx:if="{{currentTurn === humanRoleConstant}}" class="player-turn">落子中</text>
       </view>
       <view class="vs-tag">VS</view>
       <view class="player-card {{currentTurn === aiRoleConstant ? 'active' : ''}}">
-        <view class="player-token white"></view>
-        <text class="player-name">电脑</text>
-        <text class="player-role white">白棋</text>
+        <view class="player-row">
+          <view class="stone-icon white"></view>
+          <view class="player-meta">
+            <text class="player-name">电脑</text>
+            <text class="player-role">白棋</text>
+          </view>
+        </view>
+        <text wx:if="{{currentTurn === aiRoleConstant}}" class="player-turn">思考中</text>
       </view>
     </view>
     <text class="status">{{statusText}}</text>
