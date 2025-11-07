@@ -6,7 +6,8 @@ const {
   cloneBoard,
   togglePlayer,
   hasEmptyCell,
-  checkWinner
+  checkWinner,
+  findBestMove
 } = require("../utils/gomoku");
 
 function placeStone(board, row, col, player) {
@@ -21,6 +22,8 @@ function runTests() {
   testDiagonalWin();
   testHasEmptyCell();
   testTogglePlayer();
+  testAiFindsWinningMove();
+  testAiBlocksOpponent();
   console.log("✅ gomoku utils 测试全部通过");
 }
 
@@ -59,6 +62,40 @@ function testHasEmptyCell() {
 function testTogglePlayer() {
   assert.strictEqual(togglePlayer(PLAYER_BLACK), PLAYER_WHITE, "黑棋应切换为白棋");
   assert.strictEqual(togglePlayer(PLAYER_WHITE), PLAYER_BLACK, "白棋应切换为黑棋");
+}
+
+function testAiFindsWinningMove() {
+  let board = createEmptyBoard(15);
+  board = placeStone(board, 7, 7, PLAYER_WHITE);
+  board = placeStone(board, 7, 8, PLAYER_WHITE);
+  board = placeStone(board, 7, 9, PLAYER_WHITE);
+  board = placeStone(board, 7, 10, PLAYER_WHITE);
+  const move = findBestMove(board, PLAYER_WHITE, PLAYER_BLACK);
+  const winningOptions = [
+    { row: 7, col: 6 },
+    { row: 7, col: 11 }
+  ];
+  assert(
+    winningOptions.some((option) => option.row === move.row && option.col === move.col),
+    "AI 应寻找立即获胜的落点"
+  );
+}
+
+function testAiBlocksOpponent() {
+  let board = createEmptyBoard(15);
+  board = placeStone(board, 5, 5, PLAYER_BLACK);
+  board = placeStone(board, 6, 6, PLAYER_BLACK);
+  board = placeStone(board, 7, 7, PLAYER_BLACK);
+  board = placeStone(board, 8, 8, PLAYER_BLACK);
+  const move = findBestMove(board, PLAYER_WHITE, PLAYER_BLACK);
+  const blockingOptions = [
+    { row: 4, col: 4 },
+    { row: 9, col: 9 }
+  ];
+  assert(
+    blockingOptions.some((option) => option.row === move.row && option.col === move.col),
+    "AI 应阻挡对手的连五机会"
+  );
 }
 
 runTests();

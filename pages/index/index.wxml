@@ -10,7 +10,7 @@
   <view class="status-card">
     <view class="status-row">
       <text class="status-label">当前执子：</text>
-      <view class="status-player {{currentPlayer}}">{{currentPlayer === 'black' ? '黑棋' : '白棋'}}</view>
+      <view class="status-player {{currentPlayer}}">{{currentPlayer === 'black' ? '黑棋（玩家）' : '白棋（豆芽助手）'}}</view>
     </view>
     <view class="status-row">
       <text class="status-label">对局状态：</text>
@@ -18,7 +18,7 @@
     </view>
     <view class="status-actions">
       <button class="btn-primary" bindtap="handleRestart">重新开局</button>
-      <button class="btn-secondary" bindtap="handleUndo" disabled="{{!canUndo}}">悔棋</button>
+      <button class="btn-secondary" bindtap="handleUndo" disabled="{{!canUndo || isAiThinking}}">悔棋</button>
     </view>
   </view>
 
