@@ -50,31 +50,31 @@
     </view>
 
     <view class="star-layer">
-      <block wx:for="{{starPoints}}" wx:key="{{item.row}}-{{item.col}}">
-        <view class="star-dot" style="top: {{linePositions[item.row]}}%; left: {{linePositions[item.col]}}%;"></view>
+      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="star-row-{{rowIndex}}">
+        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="star-col-{{colIndex}}">
+          <view class="star-cell">
+            <view wx:if="{{starPointsMap[rowIndex + '-' + colIndex]}}" class="star-dot"></view>
+          </view>
+        </block>
       </block>
     </view>
 
     <view class="stone-layer">
-      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
-        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
-          <view
-            wx:if="{{cell === AI_PLAYER || cell === HUMAN_PLAYER}}"
-            class="piece-wrapper {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-move' : ''}}"
-            style="top: {{linePositions[rowIndex]}}%; left: {{linePositions[colIndex]}}%;"
-          >
-            <view class="piece {{cell === AI_PLAYER ? 'ai' : 'player'}}"></view>
+      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="stone-row-{{rowIndex}}">
+        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="stone-col-{{colIndex}}">
+          <view class="stone-cell {{lastMove && lastMove.row === rowIndex && lastMove.col === colIndex ? 'last-cell' : ''}}">
+            <view wx:if="{{cell === AI_PLAYER}}" class="piece ai"></view>
+            <view wx:elif="{{cell === HUMAN_PLAYER}}" class="piece player"></view>
           </view>
         </block>
       </block>
     </view>
 
     <view class="touch-layer">
-      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex">
-        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex">
+      <block wx:for="{{board}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="touch-row-{{rowIndex}}">
+        <block wx:for="{{row}}" wx:for-item="cell" wx:for-index="colIndex" wx:key="touch-col-{{colIndex}}">
           <view
-            class="touch-point {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
-            style="top: {{linePositions[rowIndex]}}%; left: {{linePositions[colIndex]}}%;"
+            class="touch-cell {{hintMove && hintMove.row === rowIndex && hintMove.col === colIndex ? 'hint' : ''}} {{(gameOver || (!isPlayerTurn && !isOnlineMode) || (isOnlineMode && !onlineCanAct)) ? 'disabled' : ''}}"
             data-row="{{rowIndex}}"
             data-col="{{colIndex}}"
             bindtap="handleCellTap"
