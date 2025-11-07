@@ -21,7 +21,7 @@
       wx:for-index="rowIndex"
     >
       <view 
-        class="cell {{item === 1 ? 'black' : item === 2 ? 'white' : ''}}"
+        class="cell {{cell === 1 ? 'black' : cell === 2 ? 'white' : ''}}"
         wx:for="{{row}}"
         wx:for-item="cell"
         wx:for-index="colIndex"

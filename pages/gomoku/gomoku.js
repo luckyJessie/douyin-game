@@ -68,12 +68,13 @@ Page({
       return;
     }
 
-    // 玩家落子
-    board[row][col] = currentPlayer;
-    this.setData({ board: board });
+    // 玩家落子 - 需要深拷贝数组以确保视图更新
+    const newBoard = board.map(r => [...r]);
+    newBoard[row][col] = currentPlayer;
+    this.setData({ board: newBoard });
 
     // 检查是否获胜
-    const winner = this.checkWinner(board);
+    const winner = this.checkWinner(newBoard);
     if (winner !== 0) {
       this.endGame(winner);
       return;
@@ -98,15 +99,20 @@ Page({
     const ai = this.data.ai;
     const board = this.data.board;
 
+    // 深拷贝棋盘供AI使用
+    const boardCopy = board.map(r => [...r]);
+    
     // 使用AI算法计算最佳落子位置
-    const bestMove = ai.getBestMove(board);
+    const bestMove = ai.getBestMove(boardCopy);
 
     if (bestMove) {
-      board[bestMove.row][bestMove.col] = 2; // AI执白棋
-      this.setData({ board: board });
+      // 更新实际棋盘 - 需要深拷贝数组以确保视图更新
+      const newBoard = board.map(r => [...r]);
+      newBoard[bestMove.row][bestMove.col] = 2; // AI执白棋
+      this.setData({ board: newBoard });
 
       // 检查是否获胜
-      const winner = this.checkWinner(board);
+      const winner = this.checkWinner(newBoard);
       if (winner !== 0) {
         this.endGame(winner);
         return;
