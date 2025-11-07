@@ -20,7 +20,6 @@ function computeDisplaySize(windowWidth) {
 Page({
   data: {
     statusText: '准备开始，点击棋盘落子',
-    playerFirst: true,
     gameOver: false,
     canUndo: false,
     aiThinking: false,
@@ -33,7 +32,11 @@ Page({
     difficultyLabels: ['入门', '标准', '高手'],
     steps: [],
     canvasPixelSize: 320,
-    canvasDisplaySize: 320
+    canvasDisplaySize: 320,
+    currentTurn: HUMAN_ROLE,
+    resultMessage: '',
+    humanRoleConstant: HUMAN_ROLE,
+    aiRoleConstant: AI_ROLE
   },
 
   onLoad() {
@@ -48,18 +51,20 @@ Page({
     this.pixelRatio = pixelRatio;
     this.canvasSize = displaySize;
     this.board = createEmptyBoard(BOARD_SIZE);
-    this.currentRole = this.data.playerFirst ? this.humanRole : this.aiRole;
+    this.currentRole = this.humanRole;
     this.stepsStack = [];
 
     this.setData({
       canvasDisplaySize: displaySize,
-      canvasPixelSize
+      canvasPixelSize,
+      currentTurn: this.humanRole,
+      statusText: '你先手，请落子'
     });
   },
 
   onReady() {
     this.setupCanvas().then(() => {
-      this.resetGame({ triggerAI: !this.data.playerFirst });
+      this.resetGame();
     });
   },
   
@@ -97,22 +102,20 @@ Page({
     });
   },
 
-  resetGame({ triggerAI = false } = {}) {
+  resetGame() {
     this.board = createEmptyBoard(BOARD_SIZE);
     this.stepsStack = [];
-    this.currentRole = this.data.playerFirst ? this.humanRole : this.aiRole;
-    const status = this.data.playerFirst ? '你先手，请落子' : '电脑先手，请稍候';
+    this.currentRole = this.humanRole;
     this.setData({
-      statusText: status,
+      statusText: '你先手，请落子',
       gameOver: false,
       canUndo: false,
-      aiThinking: triggerAI,
-      steps: []
+      aiThinking: false,
+      steps: [],
+      currentTurn: this.humanRole,
+      resultMessage: ''
     });
     this.renderBoard();
-    if (triggerAI) {
-      this.deferAiMove();
-    }
   },
 
   renderBoard() {
@@ -231,7 +234,8 @@ Page({
     this.currentRole = this.aiRole;
     this.setData({
       statusText: '电脑思考中...',
-      aiThinking: true
+      aiThinking: true,
+      currentTurn: this.aiRole
     });
     this.deferAiMove();
   },
@@ -274,7 +278,8 @@ Page({
     this.currentRole = this.humanRole;
     this.setData({
       statusText: '轮到你了',
-      aiThinking: false
+      aiThinking: false,
+      currentTurn: this.humanRole
     });
   },
 
@@ -282,7 +287,9 @@ Page({
     this.setData({
       statusText: '平局',
       gameOver: true,
-      aiThinking: false
+      aiThinking: false,
+      currentTurn: 0,
+      resultMessage: '平局'
     });
   },
 
@@ -292,7 +299,9 @@ Page({
       this.setData({
         statusText: '恭喜，你赢了！',
         gameOver: true,
-        aiThinking: false
+        aiThinking: false,
+        currentTurn: 0,
+        resultMessage: '你获胜了！'
       });
       return true;
     }
@@ -300,7 +309,9 @@ Page({
       this.setData({
         statusText: '电脑获胜，再试一次吧',
         gameOver: true,
-        aiThinking: false
+        aiThinking: false,
+        currentTurn: 0,
+        resultMessage: '电脑获胜'
       });
       return true;
     }
@@ -340,7 +351,7 @@ Page({
   },
 
   handleRestart() {
-    this.resetGame({ triggerAI: !this.data.playerFirst });
+    this.resetGame();
   },
 
   handleUndo() {
@@ -361,24 +372,11 @@ Page({
       canUndo: this.stepsStack.length > 0,
       aiThinking: false,
       statusText: '轮到你了',
-      gameOver: false
+      gameOver: false,
+      currentTurn: this.humanRole,
+      resultMessage: ''
     });
     this.renderBoard();
-  },
-
-  toggleFirst() {
-    if (!this.data.gameOver && this.stepsStack.length > 0) {
-      return;
-    }
-    const next = !this.data.playerFirst;
-    this.setData(
-      {
-        playerFirst: next
-      },
-      () => {
-        this.resetGame({ triggerAI: !next });
-      }
-    );
   },
 
   handleDifficultyChange(event) {
