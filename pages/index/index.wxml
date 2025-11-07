@@ -1,45 +1,70 @@
 <view class="container">
-  <canvas
-    canvas-id="board"
-    class="board"
-    width="{{canvasSize}}"
-    height="{{canvasSize}}"
-    style="width:{{canvasSize}}px;height:{{canvasSize}}px;"
-    bindtouchend="handleTouch"
-  ></canvas>
+  <view class="info-card">
+    <view class="info-header">
+      <view>
+        <text class="info-title">五子棋对弈</text>
+        <text class="info-subtitle">{{modeOptions[modeIndex].label}}</text>
+      </view>
+      <view class="badge" wx:if="{{mode === 'HUMAN_VS_AI'}}">{{difficultyOptions[difficultyIndex].label}}</view>
+      <view class="badge" wx:if="{{mode === 'HUMAN_VS_HUMAN'}}">双人同屏</view>
+      <view class="badge {{'status-' + onlineStatus}}" wx:if="{{mode === 'ONLINE'}}">{{onlineStatusText}}</view>
+    </view>
+    <view class="info-message">
+      <text class="info-label">当前提示</text>
+      <text class="info-value">{{message}}</text>
+    </view>
+  </view>
 
-  <view class="panel">
-    <text class="message">{{message}}</text>
+  <view class="board-section">
+    <view class="board-frame">
+      <view class="board-glow"></view>
+      <canvas
+        canvas-id="board"
+        class="board"
+        width="{{canvasSize}}"
+        height="{{canvasSize}}"
+        style="width:{{canvasSize}}px;height:{{canvasSize}}px;"
+        bindtouchend="handleTouch"
+      ></canvas>
+    </view>
+  </view>
 
-    <view class="controls">
-      <view class="control-row">
-        <view class="control-item">
-          <text class="control-label">对战模式</text>
-          <picker mode="selector" range="{{modeOptions}}" range-key="label" value="{{modeIndex}}" bindchange="handleModeChange">
-            <view class="picker-value">{{modeOptions[modeIndex].label}}</view>
-          </picker>
-        </view>
-        <view class="control-item" wx:if="{{mode === 'HUMAN_VS_AI'}}">
-          <text class="control-label">AI 难度</text>
-          <picker mode="selector" range="{{difficultyOptions}}" range-key="label" value="{{difficultyIndex}}" bindchange="handleDifficultyChange">
-            <view class="picker-value">{{difficultyOptions[difficultyIndex].label}}</view>
-          </picker>
-        </view>
+  <view class="panel control-card">
+    <view class="control-group">
+      <view class="control-block">
+        <text class="control-label">对战模式</text>
+        <picker class="control-picker" mode="selector" range="{{modeOptions}}" range-key="label" value="{{modeIndex}}" bindchange="handleModeChange">
+          <view class="picker-display">
+            <text>{{modeOptions[modeIndex].label}}</text>
+            <icon type="arrowdown" size="16"></icon>
+          </view>
+        </picker>
       </view>
 
-      <view class="control-row" wx:if="{{mode === 'HUMAN_VS_AI'}}">
-        <button size="mini" bindtap="toggleFirst">{{humanFirst ? '切换电脑先手' : '切换玩家先手'}}</button>
-        <button size="mini" type="primary" bindtap="restartGame">重新开始</button>
+      <view class="control-block" wx:if="{{mode === 'HUMAN_VS_AI'}}">
+        <text class="control-label">AI 难度</text>
+        <picker class="control-picker" mode="selector" range="{{difficultyOptions}}" range-key="label" value="{{difficultyIndex}}" bindchange="handleDifficultyChange">
+          <view class="picker-display">
+            <text>{{difficultyOptions[difficultyIndex].label}}</text>
+            <icon type="arrowdown" size="16"></icon>
+          </view>
+        </picker>
       </view>
-      <view class="control-row" wx:if="{{mode !== 'HUMAN_VS_AI'}}">
-        <button size="mini" type="primary" bindtap="restartGame">重新开始</button>
-      </view>
+    </view>
 
-      <view class="control-row">
-        <button size="mini" bindtap="undoMove">悔棋</button>
-        <button size="mini" bindtap="redoMove">撤销悔棋</button>
-        <button size="mini" bindtap="openHistoryPanel">历史复盘</button>
-      </view>
+    <view class="control-group">
+      <button size="mini" type="default" bindtap="undoMove">悔棋</button>
+      <button size="mini" type="default" bindtap="redoMove">撤销悔棋</button>
+      <button size="mini" type="default" bindtap="openHistoryPanel">历史复盘</button>
+    </view>
+
+    <view class="control-group" wx:if="{{mode === 'HUMAN_VS_AI'}}">
+      <button size="mini" type="default" bindtap="toggleFirst">{{humanFirst ? '切换电脑先手' : '切换玩家先手'}}</button>
+      <button size="mini" type="primary" bindtap="restartGame">重新开始</button>
+    </view>
+
+    <view class="control-group" wx:if="{{mode !== 'HUMAN_VS_AI'}}">
+      <button size="mini" type="primary" bindtap="restartGame">重新开始</button>
     </view>
 
     <view class="online-panel" wx:if="{{mode === 'ONLINE'}}">
@@ -50,11 +75,10 @@
         value="{{onlineRoomId}}"
         bindinput="handleRoomInput"
       />
-      <view class="control-row">
+      <view class="control-group">
         <button size="mini" type="primary" bindtap="connectOnline">{{onlineStatus === 'connected' ? '重新连接' : '加入房间'}}</button>
-        <button size="mini" wx:if="{{onlineStatus === 'connected'}}" bindtap="leaveOnlineRoom">离开房间</button>
+        <button size="mini" type="default" wx:if="{{onlineStatus === 'connected'}}" bindtap="leaveOnlineRoom">离开房间</button>
       </view>
-      <text class="tip">{{onlineStatusText}}</text>
     </view>
 
     <text class="tip">提示：点击棋盘交叉点即可落子；悔棋会在人人对弈模式撤销一步，在人机模式撤销双方最近的落子。</text>
