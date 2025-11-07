@@ -118,10 +118,30 @@ class AI {
 
     // 4. 使用Alpha-Beta剪枝的Minimax算法
     // 对候选位置进行排序，优先搜索高价值位置
-    const scoredMoves = moves.map(move => ({
-      move,
-      score: this.quickEvaluate(this.board, move.row, move.col, this.aiPlayer)
-    }))
+    const scoredMoves = moves.map(move => {
+      // 增强防守评分
+      let defenseScore = 0
+      const board = this.board.map(r => [...r])
+      
+      // 检查如果AI不防守，玩家是否能形成威胁
+      board[move.row][move.col] = this.humanPlayer
+      const humanLiveFour = this.countLiveFour(board, move.row, move.col, this.humanPlayer)
+      const humanRushFour = this.countRushFour(board, move.row, move.col, this.humanPlayer)
+      const humanLiveThree = this.countLiveThree(board, move.row, move.col, this.humanPlayer)
+      
+      if (humanLiveFour > 0) {
+        defenseScore += 10000  // 必须防守活四
+      } else if (humanRushFour > 0) {
+        defenseScore += 5000   // 优先防守冲四
+      } else if (humanLiveThree >= 2) {
+        defenseScore += 2000   // 优先防守双活三
+      } else if (humanLiveThree > 0) {
+        defenseScore += 500    // 防守活三
+      }
+      
+      const score = this.quickEvaluate(this.board, move.row, move.col, this.aiPlayer) + defenseScore
+      return { move, score }
+    })
     scoredMoves.sort((a, b) => b.score - a.score)
 
     // 限制搜索的前几个最佳位置（根据难度调整）
@@ -171,18 +191,50 @@ class AI {
       }
     }
 
-    // 检查是否需要防守（阻止玩家获胜）
+    // 检查是否需要防守（阻止玩家获胜）- 增强版
+    let urgentDefense = null
+    let highThreatDefense = null
+    
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
         if (this.board[i][j] === 0) {
+          // 检查玩家在此位置是否能直接获胜（必须防守）
           this.board[i][j] = this.humanPlayer
           if (this.checkWinnerAt(this.board, i, j) === this.humanPlayer) {
             this.board[i][j] = 0
             return { row: i, col: j } // 必须防守
           }
+          
+          // 检查玩家是否能形成活四或冲四（高威胁，优先防守）
+          const liveFour = this.countLiveFour(this.board, i, j, this.humanPlayer)
+          const rushFour = this.countRushFour(this.board, i, j, this.humanPlayer)
+          
+          if (liveFour > 0 || rushFour > 0) {
+            this.board[i][j] = 0
+            if (!urgentDefense) {
+              urgentDefense = { row: i, col: j }
+            }
+          }
+          
+          // 检查玩家是否能形成活三（中等威胁）
+          const liveThree = this.countLiveThree(this.board, i, j, this.humanPlayer)
+          if (liveThree >= 2 && !highThreatDefense) {
+            this.board[i][j] = 0
+            highThreatDefense = { row: i, col: j }
+          }
+          
           this.board[i][j] = 0
         }
       }
+    }
+    
+    // 优先返回高威胁防守位置
+    if (urgentDefense) {
+      return urgentDefense
+    }
+    
+    if (highThreatDefense) {
+      return highThreatDefense
     }
 
     return null
@@ -385,24 +437,41 @@ class AI {
 
     // 1. 基础连子评估
     score += this.evaluateLines(board, this.aiPlayer) * 20
-    score -= this.evaluateLines(board, this.humanPlayer) * 20
+    score -= this.evaluateLines(board, this.humanPlayer) * 25  // 增加防守权重
 
     // 2. 威胁评估（能形成五连的位置）
     score += this.evaluateThreats(board, this.aiPlayer) * 200
-    score -= this.evaluateThreats(board, this.humanPlayer) * 200
+    score -= this.evaluateThreats(board, this.humanPlayer) * 300  // 大幅增加防守权重
 
-    // 3. 复杂棋形评估（双三、双四等）- 恢复此功能提升AI水平
+    // 3. 复杂棋形评估（双三、双四等）
     score += this.evaluateComplexShapes(board, this.aiPlayer) * 40
-    score -= this.evaluateComplexShapes(board, this.humanPlayer) * 40
+    score -= this.evaluateComplexShapes(board, this.humanPlayer) * 60  // 增加防守权重
 
     // 4. 位置权重评估
     score += this.evaluatePositionValue(board, this.aiPlayer) * 0.8
     score -= this.evaluatePositionValue(board, this.humanPlayer) * 0.8
 
-    // 5. 攻防平衡：如果玩家有威胁，加强防守权重
+    // 5. 攻防平衡：如果玩家有威胁，大幅加强防守权重
     const humanThreats = this.evaluateThreats(board, this.humanPlayer)
     if (humanThreats > 0) {
-      score -= humanThreats * 50 // 防守权重
+      score -= humanThreats * 100  // 大幅增加防守权重
+    }
+    
+    // 6. 检查玩家活三、冲四威胁（新增）
+    const humanLiveThrees = this.countAllLiveThrees(board, this.humanPlayer)
+    const humanRushFours = this.countAllRushFours(board, this.humanPlayer)
+    const humanLiveFours = this.countAllLiveFours(board, this.humanPlayer)
+    
+    if (humanLiveFours > 0) {
+      score -= 5000  // 活四威胁极大，必须防守
+    }
+    if (humanRushFours > 0) {
+      score -= 2000  // 冲四威胁很大
+    }
+    if (humanLiveThrees >= 2) {
+      score -= 1000  // 双活三威胁很大
+    } else if (humanLiveThrees > 0) {
+      score -= 300  // 活三威胁
     }
 
     return score
@@ -444,6 +513,57 @@ class AI {
     return score
   }
 
+  /**
+   * 统计所有位置的活三数量
+   */
+  countAllLiveThrees(board, player) {
+    let totalCount = 0
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
+        if (board[i][j] === 0) {
+          const count = this.countLiveThree(board, i, j, player)
+          if (count > 0) {
+            totalCount += count
+          }
+        }
+      }
+    }
+    return totalCount
+  }
+
+  /**
+   * 统计所有位置的冲四数量
+   */
+  countAllRushFours(board, player) {
+    let totalCount = 0
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
+        if (board[i][j] === 0) {
+          const count = this.countRushFour(board, i, j, player)
+          if (count > 0) {
+            totalCount += count
+          }
+        }
+      }
+    }
+    return totalCount
+  }
+
+  /**
+   * 统计所有位置的活四数量
+   */
+  countAllLiveFours(board, player) {
+    let totalCount = 0
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
+        if (board[i][j] === 0) {
+          const count = this.countLiveFour(board, i, j, player)
+          if (count > 0) {
+            totalCount += count
+          }
+        }
+      }
+    }
   /**
    * 统计活三数量
    */
