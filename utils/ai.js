@@ -30,9 +30,9 @@ class AI {
    */
   setDepthByDifficulty() {
     const depthConfig = {
-      'easy': { start: 2, mid: 2, end: 2 },
-      'medium': { start: 2, mid: 3, end: 3 },
-      'hard': { start: 3, mid: 3, end: 4 }
+      'easy': { start: 3, mid: 3, end: 4 },
+      'medium': { start: 3, mid: 4, end: 5 },
+      'hard': { start: 4, mid: 5, end: 6 }
     }
     const baseDepth = depthConfig[this.difficulty] || depthConfig.medium
 
@@ -124,12 +124,12 @@ class AI {
     }))
     scoredMoves.sort((a, b) => b.score - a.score)
 
-    // 限制搜索的前几个最佳位置（进一步优化）
+    // 限制搜索的前几个最佳位置（根据难度调整）
     const searchLimit = Math.min(scoredMoves.length, {
-      'easy': 5,
-      'medium': 8,
-      'hard': 12
-    }[this.difficulty] || 8)
+      'easy': 10,
+      'medium': 15,
+      'hard': 20
+    }[this.difficulty] || 15)
 
     for (let i = 0; i < searchLimit; i++) {
       const { move } = scoredMoves[i]
@@ -246,7 +246,7 @@ class AI {
     // 位置权重
     score += this.positionWeights[row][col]
     
-    // 检查周围棋子情况
+    // 检查周围棋子情况（增强版）
     const directions = [[0, 1], [1, 0], [1, 1], [1, -1]]
     for (let [dr, dc] of directions) {
       let aiCount = 0
@@ -258,6 +258,7 @@ class AI {
         let c = col + dir[1]
         let count = 1
         
+        // AI连子
         while (
           r >= 0 && r < this.size &&
           c >= 0 && c < this.size &&
@@ -269,10 +270,32 @@ class AI {
           c += dir[1]
           count++
         }
+        
+        // 人类连子
+        r = row + dir[0]
+        c = col + dir[1]
+        count = 1
+        while (
+          r >= 0 && r < this.size &&
+          c >= 0 && c < this.size &&
+          board[r][c] === this.humanPlayer &&
+          count < 4
+        ) {
+          humanCount++
+          r += dir[0]
+          c += dir[1]
+          count++
+        }
       }
       
-      if (aiCount >= 3) score += 100
-      else if (aiCount === 2) score += 10
+      // 根据连子数给分（增强）
+      if (aiCount >= 3) score += 200
+      else if (aiCount === 2) score += 30
+      else if (aiCount === 1) score += 5
+      
+      if (humanCount >= 3) score -= 150  // 防守
+      else if (humanCount === 2) score -= 20
+      else if (humanCount === 1) score -= 3
     }
     
     return score
@@ -305,8 +328,14 @@ class AI {
     }))
     scoredMoves.sort((a, b) => b.score - a.score)
     
-    // 限制搜索的移动数量（根据深度和难度）
-    const maxMovesToSearch = depth > 2 ? Math.min(scoredMoves.length, 8) : scoredMoves.length
+    // 限制搜索的移动数量（根据深度和难度，增加搜索数量以提升AI水平）
+    const maxMovesToSearch = depth > 2 
+      ? Math.min(scoredMoves.length, {
+          'easy': 10,
+          'medium': 12,
+          'hard': 15
+        }[this.difficulty] || 12)
+      : scoredMoves.length
     const movesToSearch = scoredMoves.slice(0, maxMovesToSearch)
 
     if (isMaximizing) {
@@ -350,26 +379,30 @@ class AI {
     }
   }
 
-  // 增强的评估函数（简化版，提高性能）
+  // 增强的评估函数
   evaluate(board) {
     let score = 0
 
-    // 1. 基础连子评估（简化）
-    score += this.evaluateLines(board, this.aiPlayer) * 15
-    score -= this.evaluateLines(board, this.humanPlayer) * 15
+    // 1. 基础连子评估
+    score += this.evaluateLines(board, this.aiPlayer) * 20
+    score -= this.evaluateLines(board, this.humanPlayer) * 20
 
     // 2. 威胁评估（能形成五连的位置）
-    score += this.evaluateThreats(board, this.aiPlayer) * 150
-    score -= this.evaluateThreats(board, this.humanPlayer) * 150
+    score += this.evaluateThreats(board, this.aiPlayer) * 200
+    score -= this.evaluateThreats(board, this.humanPlayer) * 200
 
-    // 3. 位置权重评估（简化）
-    score += this.evaluatePositionValue(board, this.aiPlayer) * 0.5
-    score -= this.evaluatePositionValue(board, this.humanPlayer) * 0.5
+    // 3. 复杂棋形评估（双三、双四等）- 恢复此功能提升AI水平
+    score += this.evaluateComplexShapes(board, this.aiPlayer) * 40
+    score -= this.evaluateComplexShapes(board, this.humanPlayer) * 40
 
-    // 4. 攻防平衡：如果玩家有威胁，加强防守权重
+    // 4. 位置权重评估
+    score += this.evaluatePositionValue(board, this.aiPlayer) * 0.8
+    score -= this.evaluatePositionValue(board, this.humanPlayer) * 0.8
+
+    // 5. 攻防平衡：如果玩家有威胁，加强防守权重
     const humanThreats = this.evaluateThreats(board, this.humanPlayer)
     if (humanThreats > 0) {
-      score -= humanThreats * 30 // 防守权重
+      score -= humanThreats * 50 // 防守权重
     }
 
     return score
@@ -708,9 +741,9 @@ class AI {
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
         if (board[i][j] !== 0) {
-          // 查找周围1格内的空位（减少搜索范围）
-          for (let di = -1; di <= 1; di++) {
-            for (let dj = -1; dj <= 1; dj++) {
+          // 查找周围2格内的空位（恢复2格范围以提升AI水平）
+          for (let di = -2; di <= 2; di++) {
+            for (let dj = -2; dj <= 2; dj++) {
               if (di === 0 && dj === 0) continue
               const ni = i + di
               const nj = j + dj
@@ -739,10 +772,10 @@ class AI {
 
     // 限制搜索范围以提高性能（根据难度调整）
     const maxMoves = {
-      'easy': 10,
-      'medium': 15,
-      'hard': 20
-    }[this.difficulty] || 15
+      'easy': 20,
+      'medium': 25,
+      'hard': 30
+    }[this.difficulty] || 25
     
     if (moves.length > maxMoves) {
       // 根据位置价值排序，选择最好的位置
