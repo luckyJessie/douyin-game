@@ -37,7 +37,7 @@
       width="{{canvasPixelSize}}"
       height="{{canvasPixelSize}}"
     ></canvas>
-    <view wx:if="{{gameOver}}" class="result-banner">
+    <view wx:if="{{gameOver}}" class="result-banner {{resultType}} {{resultAnimation}}">
       <image wx:if="{{resultIcon}}" class="result-icon" src="{{resultIcon}}" mode="aspectFit" />
       <text class="result-text">{{resultMessage}}</text>
       <button class="result-button" size="mini" type="primary" bindtap="handleRestart">再来一局</button>

@@ -136,6 +136,33 @@
   row-gap: 24rpx;
 }
 
+.result-banner.win {
+  background: rgba(68, 214, 164, 0.15);
+  backdrop-filter: blur(6rpx);
+}
+
+.result-banner.lose {
+  background: rgba(238, 92, 92, 0.18);
+  backdrop-filter: blur(6rpx);
+}
+
+.result-banner.draw {
+  background: rgba(164, 185, 207, 0.18);
+  backdrop-filter: blur(6rpx);
+}
+
+.result-animate-pop {
+  animation: result-pop 0.6s ease-out forwards;
+}
+
+.result-animate-shake {
+  animation: result-shake 0.6s ease both;
+}
+
+.result-animate-pulse {
+  animation: result-pulse 1s ease-in-out both;
+}
+
 .result-icon {
   width: 120rpx;
   height: 120rpx;
@@ -159,6 +186,90 @@
 
 .result-button::after {
   border: none;
+}
+
+.result-banner.win .result-text {
+  color: #3ce1a0;
+}
+
+.result-banner.lose .result-text {
+  color: #ff7676;
+}
+
+.result-banner.draw .result-text {
+  color: #d1e4ff;
+}
+
+.result-banner.win .result-button {
+  background: linear-gradient(135deg, #3be1a4, #7fffd4);
+  box-shadow: 0 8rpx 24rpx rgba(59, 225, 164, 0.35);
+}
+
+.result-banner.lose .result-button {
+  background: linear-gradient(135deg, #f5576c, #f093fb);
+  box-shadow: 0 8rpx 24rpx rgba(245, 87, 108, 0.35);
+}
+
+.result-banner.draw .result-button {
+  background: linear-gradient(135deg, #87a0c4, #b7c9f2);
+  box-shadow: 0 8rpx 24rpx rgba(135, 160, 196, 0.35);
+}
+
+.result-banner.win .result-button::after,
+.result-banner.lose .result-button::after,
+.result-banner.draw .result-button::after {
+  border: none;
+}
+
+.result-banner.win .result-button,
+.result-banner.lose .result-button,
+.result-banner.draw .result-button {
+  color: #1e1e2f;
+}
+
+@keyframes result-pop {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes result-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-18rpx);
+  }
+  40%,
+  80% {
+    transform: translateX(18rpx);
+  }
+}
+
+@keyframes result-pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
 }
 
 .controls {

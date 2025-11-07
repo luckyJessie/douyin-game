@@ -4,6 +4,19 @@ const BOARD_SIZE = 15;
 const HUMAN_ROLE = 1;
 const AI_ROLE = -1;
 
+const AUDIO_RESOURCES = {
+  bgm: 'https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3',
+  place: 'https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.mp3',
+  win: 'https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3',
+  lose: 'https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-game-over-470.mp3'
+};
+
+const RESULT_ANIMATIONS = {
+  win: 'result-animate-pop',
+  lose: 'result-animate-shake',
+  draw: 'result-animate-pulse'
+};
+
 function createEmptyBoard(size) {
   return Array.from({ length: size }, () => Array(size).fill(0));
 }
@@ -36,6 +49,8 @@ Page({
     currentTurn: HUMAN_ROLE,
     resultMessage: '',
     resultIcon: '',
+    resultType: '',
+    resultAnimation: '',
     humanRoleConstant: HUMAN_ROLE,
     aiRoleConstant: AI_ROLE
   },
@@ -61,6 +76,7 @@ Page({
       currentTurn: this.humanRole,
       statusText: '你先手，请落子'
     });
+    this.initAudio();
   },
 
   onReady() {
@@ -115,9 +131,12 @@ Page({
       steps: [],
       currentTurn: this.humanRole,
       resultMessage: '',
-      resultIcon: ''
+      resultIcon: '',
+      resultType: '',
+      resultAnimation: ''
     });
     this.renderBoard();
+    this.startBackgroundMusic();
   },
 
   renderBoard() {
@@ -213,6 +232,7 @@ Page({
   },
 
   handleTap(event) {
+    this.startBackgroundMusic();
     if (this.data.gameOver || this.data.aiThinking || this.currentRole !== this.humanRole) {
       return;
     }
@@ -250,6 +270,7 @@ Page({
       canUndo: this.stepsStack.length > 0
     });
     this.renderBoard();
+    this.playPlaceSound();
   },
 
   deferAiMove() {
@@ -286,37 +307,31 @@ Page({
   },
 
   finishDraw() {
-    this.setData({
-      statusText: '平局',
-      gameOver: true,
-      aiThinking: false,
-      currentTurn: 0,
-      resultMessage: '平局',
-      resultIcon: '/assets/icons/draw.svg'
+    this.triggerResult({
+      type: 'draw',
+      status: '平局',
+      message: '平局',
+      icon: '/assets/icons/draw.svg'
     });
   },
 
   checkGameOver(move) {
     const winner = this.ai.checkWinner(this.board, move);
     if (winner === this.humanRole) {
-      this.setData({
-        statusText: '恭喜，你赢了！',
-        gameOver: true,
-        aiThinking: false,
-        currentTurn: 0,
-        resultMessage: '你获胜了！',
-        resultIcon: '/assets/icons/win.svg'
+      this.triggerResult({
+        type: 'win',
+        status: '恭喜，你赢了！',
+        message: '你获胜了！',
+        icon: '/assets/icons/win.svg'
       });
       return true;
     }
     if (winner === this.aiRole) {
-      this.setData({
-        statusText: '电脑获胜，再试一次吧',
-        gameOver: true,
-        aiThinking: false,
-        currentTurn: 0,
-        resultMessage: '电脑获胜',
-        resultIcon: '/assets/icons/lose.svg'
+      this.triggerResult({
+        type: 'lose',
+        status: '电脑获胜，再试一次吧',
+        message: '电脑获胜',
+        icon: '/assets/icons/lose.svg'
       });
       return true;
     }
@@ -380,7 +395,9 @@ Page({
       gameOver: false,
       currentTurn: this.humanRole,
       resultMessage: '',
-      resultIcon: ''
+      resultIcon: '',
+      resultType: '',
+      resultAnimation: ''
     });
     this.renderBoard();
   },
@@ -399,5 +416,152 @@ Page({
       icon: 'none',
       duration: 800
     });
+  },
+
+  onShow() {
+    if (!this.data.gameOver) {
+      this.startBackgroundMusic();
+    }
+  },
+
+  onHide() {
+    this.pauseBackgroundMusic();
+  },
+
+  onUnload() {
+    this.destroyAudio();
+  },
+
+  initAudio() {
+    if (this.audioInitialized) {
+      return;
+    }
+    try {
+      this.bgmAudio = wx.createInnerAudioContext();
+      this.bgmAudio.loop = true;
+      this.bgmAudio.obeyMuteSwitch = false;
+      this.bgmAudio.volume = 0.4;
+      this.bgmAudio.src = AUDIO_RESOURCES.bgm;
+
+      this.placeAudio = wx.createInnerAudioContext();
+      this.placeAudio.obeyMuteSwitch = false;
+      this.placeAudio.src = AUDIO_RESOURCES.place;
+      this.placeAudio.volume = 0.6;
+
+      this.winAudio = wx.createInnerAudioContext();
+      this.winAudio.obeyMuteSwitch = false;
+      this.winAudio.src = AUDIO_RESOURCES.win;
+      this.winAudio.volume = 0.7;
+
+      this.loseAudio = wx.createInnerAudioContext();
+      this.loseAudio.obeyMuteSwitch = false;
+      this.loseAudio.src = AUDIO_RESOURCES.lose;
+      this.loseAudio.volume = 0.7;
+
+      this.audioInitialized = true;
+    } catch (error) {
+      console.warn('音频初始化失败', error);
+      this.audioInitialized = false;
+    }
+  },
+
+  startBackgroundMusic() {
+    if (!this.audioInitialized) {
+      this.initAudio();
+    }
+    if (!this.audioInitialized || !this.bgmAudio) {
+      return;
+    }
+    if (this.data.gameOver) {
+      return;
+    }
+    if (this.bgmPlaying) {
+      return;
+    }
+    this.bgmAudio.play();
+    this.bgmPlaying = true;
+  },
+
+  pauseBackgroundMusic() {
+    if (this.bgmAudio && this.bgmPlaying) {
+      this.bgmAudio.pause();
+      this.bgmPlaying = false;
+    }
+  },
+
+  destroyAudio() {
+    const audios = [this.bgmAudio, this.placeAudio, this.winAudio, this.loseAudio];
+    audios.forEach((ctx) => {
+      if (ctx && ctx.destroy) {
+        try {
+          ctx.stop();
+        } catch (error) {
+          // ignore
+        }
+        ctx.destroy();
+      }
+    });
+    this.bgmAudio = null;
+    this.placeAudio = null;
+    this.winAudio = null;
+    this.loseAudio = null;
+    this.audioInitialized = false;
+    this.bgmPlaying = false;
+  },
+
+  playEffect(audioCtx) {
+    if (!audioCtx) {
+      return;
+    }
+    try {
+      audioCtx.stop();
+    } catch (error) {
+      // ignore stop errors
+    }
+    if (typeof audioCtx.seek === 'function') {
+      audioCtx.seek(0);
+    }
+    audioCtx.play();
+  },
+
+  playPlaceSound() {
+    if (!this.audioInitialized) {
+      return;
+    }
+    this.playEffect(this.placeAudio);
+  },
+
+  playWinSound() {
+    if (!this.audioInitialized) {
+      return;
+    }
+    this.playEffect(this.winAudio);
+  },
+
+  playLoseSound() {
+    if (!this.audioInitialized) {
+      return;
+    }
+    this.playEffect(this.loseAudio);
+  },
+
+  triggerResult({ type, status, message, icon }) {
+    const animation = RESULT_ANIMATIONS[type] || '';
+    this.pauseBackgroundMusic();
+    this.setData({
+      statusText: status,
+      gameOver: true,
+      aiThinking: false,
+      currentTurn: 0,
+      resultMessage: message,
+      resultIcon: icon,
+      resultType: type,
+      resultAnimation: animation
+    });
+    if (type === 'win') {
+      this.playWinSound();
+    } else if (type === 'lose') {
+      this.playLoseSound();
+    }
   }
 });
