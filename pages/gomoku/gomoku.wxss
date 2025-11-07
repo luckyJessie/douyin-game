@@ -1,5 +1,5 @@
-/* 豆芽五子棋微信小程序样式示例 */
-/* gomoku.wxss */
+/* 豆芽五子棋微信小程序样式 */
+/* pages/gomoku/gomoku.wxss */
 
 .container {
   display: flex;

@@ -1,10 +1,10 @@
 /**
- * 豆芽五子棋微信小程序使用示例
- * 在微信小程序的页面中使用AI算法
+ * 豆芽五子棋微信小程序页面
+ * pages/gomoku/gomoku.js
  */
 
 // 引入AI算法类
-const GomokuAI = require('./gomoku-ai.js');
+const GomokuAI = require('../../utils/gomoku-ai.js');
 
 Page({
   data: {

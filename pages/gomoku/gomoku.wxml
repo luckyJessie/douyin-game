@@ -1,5 +1,5 @@
-<!-- 豆芽五子棋微信小程序页面示例 -->
-<!-- gomoku.wxml -->
+<!-- 豆芽五子棋微信小程序页面 -->
+<!-- pages/gomoku/gomoku.wxml -->
 
 <view class="container">
   <view class="header">
