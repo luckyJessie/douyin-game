@@ -1,0 +1,41 @@
+<!-- 豆芽五子棋微信小程序页面示例 -->
+<!-- gomoku.wxml -->
+
+<view class="container">
+  <view class="header">
+    <text class="title">豆芽五子棋</text>
+    <text class="status" wx:if="{{!gameOver}}">
+      {{currentPlayer === 1 ? '你的回合（黑棋）' : 'AI思考中...'}}
+    </text>
+    <text class="status" wx:else>
+      {{winner === 1 ? '你赢了！' : 'AI赢了！'}}
+    </text>
+  </view>
+
+  <view class="board">
+    <view 
+      class="row" 
+      wx:for="{{board}}" 
+      wx:key="index"
+      wx:for-item="row"
+      wx:for-index="rowIndex"
+    >
+      <view 
+        class="cell {{item === 1 ? 'black' : item === 2 ? 'white' : ''}}"
+        wx:for="{{row}}"
+        wx:for-item="cell"
+        wx:for-index="colIndex"
+        wx:key="colIndex"
+        data-row="{{rowIndex}}"
+        data-col="{{colIndex}}"
+        bindtap="onCellTap"
+      >
+        <view class="piece" wx:if="{{cell !== 0}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="restart-btn" bindtap="restartGame">重新开始</button>
+  </view>
+</view>
