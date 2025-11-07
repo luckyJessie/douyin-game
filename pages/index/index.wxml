@@ -1,7 +1,7 @@
 <!--pages/index/index.wxml-->
 <view class="container">
   <view class="header">
-    <text class="title">豆芽五子棋</text>
+    <text class="title">五子棋</text>
     <view class="status">
       <text class="status-text">{{statusText}}</text>
     </view>

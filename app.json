@@ -3,7 +3,7 @@
     "pages/index/index"
   ],
   "window": {
-    "navigationBarTitleText": "豆芽五子棋",
+    "navigationBarTitleText": "五子棋",
     "navigationBarBackgroundColor": "#4A90E2",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#F5F5F5"

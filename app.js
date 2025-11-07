@@ -1,6 +1,6 @@
 App({
   onLaunch() {
-    console.log('豆芽五子棋小程序启动')
+    console.log('微信五子棋小程序启动')
   },
   globalData: {
     userInfo: null
