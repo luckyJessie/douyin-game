@@ -564,6 +564,9 @@ class AI {
         }
       }
     }
+    return totalCount
+  }
+
   /**
    * 统计活三数量
    */
