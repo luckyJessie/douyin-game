@@ -1,0 +1,129 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx 24rpx 32rpx;
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.status {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: #666666;
+}
+
+.board-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40rpx;
+}
+
+.board {
+  width: 700rpx;
+  height: 700rpx;
+  background-color: #d8b679;
+  border: 12rpx solid #8f651f;
+  border-radius: 16rpx;
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.board-row {
+  flex: 1;
+  display: flex;
+}
+
+.board-cell {
+  flex: 1;
+  border-right: 1rpx solid rgba(90, 60, 22, 0.5);
+  border-bottom: 1rpx solid rgba(90, 60, 22, 0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.board-row:last-child .board-cell {
+  border-bottom: 0;
+}
+
+.board-cell:first-child {
+  border-left: 1rpx solid rgba(90, 60, 22, 0.5);
+}
+
+.board-row:first-child .board-cell {
+  border-top: 1rpx solid rgba(90, 60, 22, 0.5);
+}
+
+.board-cell--inactive {
+  opacity: 0.85;
+}
+
+.board-cell--last {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.board-cell--win {
+  background-color: rgba(255, 215, 0, 0.35);
+}
+
+.board-cell:active {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.stone {
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.2);
+  transform: scale(0);
+  transition: transform 0.18s ease;
+}
+
+.stone-black {
+  background: radial-gradient(circle at 35% 35%, #666666, #1f1f1f 70%);
+  transform: scale(1);
+}
+
+.stone-white {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #d9d9d9 75%);
+  border: 1rpx solid rgba(0, 0, 0, 0.12);
+  transform: scale(1);
+}
+
+.controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.control-button {
+  width: 360rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 32rpx;
+  background-color: #1f8c45;
+  color: #ffffff;
+  border: none;
+  border-radius: 44rpx;
+}
+
+.control-button:active {
+  background-color: #166633;
+}

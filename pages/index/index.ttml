@@ -1,0 +1,33 @@
+<view class="page">
+  <view class="header">
+    <text class="title">豆芽五子棋</text>
+    <text class="status">{{message}}</text>
+  </view>
+  <view class="board-wrapper">
+    <view class="board">
+      <view
+        class="board-row"
+        tt:for="{{board}}"
+        tt:for-item="row"
+        tt:for-index="rowIndex"
+        tt:key="rowIndex"
+      >
+        <view
+          class="board-cell {{winnerMap[rowIndex + '-' + colIndex] ? 'board-cell--win' : ''}} {{lastMoveKey === rowIndex + '-' + colIndex ? 'board-cell--last' : ''}} {{status !== 'playing' ? 'board-cell--inactive' : ''}}"
+          tt:for="{{row}}"
+          tt:for-item="cell"
+          tt:for-index="colIndex"
+          tt:key="colIndex"
+          data-row="{{rowIndex}}"
+          data-col="{{colIndex}}"
+          bindtap="handleCellTap"
+        >
+          <view class="stone {{cell === 'black' ? 'stone-black' : cell === 'white' ? 'stone-white' : ''}}"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="controls">
+    <button class="control-button" type="default" bindtap="handleReset">重新开始</button>
+  </view>
+</view>
