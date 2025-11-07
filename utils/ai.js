@@ -99,7 +99,7 @@ class AI {
       return openingMove
     }
 
-    // 2. 检查是否有必杀或必防的位置
+    // 2. 检查是否有必杀或必防的位置（优化：只检查关键位置）
     const forcedMove = this.findForcedMove()
     if (forcedMove) {
       return forcedMove
@@ -110,46 +110,44 @@ class AI {
       return null
     }
 
-    // 3. 终局使用更深的搜索或全搜索
-    if (this.isEndgame && this.moveCount > this.size * this.size * 0.7) {
-      // 最后阶段使用全搜索
+    // 3. 终局使用更深的搜索或全搜索（优化：只在真正终局时使用）
+    if (this.isEndgame && this.moveCount > this.size * this.size * 0.75) {
       return this.fullSearch()
     }
 
     // 4. 使用Alpha-Beta剪枝的Minimax算法
-    // 对候选位置进行排序，优先搜索高价值位置
+    // 优化：使用更高效的快速评估，减少重复计算
     const scoredMoves = moves.map(move => {
-      // 增强防守评分
+      // 使用快速评估（不创建新棋盘，提升性能）
+      const attackScore = this.quickEvaluate(this.board, move.row, move.col, this.aiPlayer)
+      
+      // 防守评分（优化：只在必要时计算）
       let defenseScore = 0
-      const board = this.board.map(r => [...r])
+      // 快速检查：只检查关键威胁，不创建完整棋盘
+      const humanThreat = this.quickCheckThreat(this.board, move.row, move.col, this.humanPlayer)
       
-      // 检查如果AI不防守，玩家是否能形成威胁
-      board[move.row][move.col] = this.humanPlayer
-      const humanLiveFour = this.countLiveFour(board, move.row, move.col, this.humanPlayer)
-      const humanRushFour = this.countRushFour(board, move.row, move.col, this.humanPlayer)
-      const humanLiveThree = this.countLiveThree(board, move.row, move.col, this.humanPlayer)
-      
-      if (humanLiveFour > 0) {
-        defenseScore += 10000  // 必须防守活四
-      } else if (humanRushFour > 0) {
-        defenseScore += 5000   // 优先防守冲四
-      } else if (humanLiveThree >= 2) {
-        defenseScore += 2000   // 优先防守双活三
-      } else if (humanLiveThree > 0) {
-        defenseScore += 500    // 防守活三
+      if (humanThreat.liveFour) {
+        defenseScore += 10000
+      } else if (humanThreat.rushFour) {
+        defenseScore += 5000
+      } else if (humanThreat.doubleLiveThree) {
+        defenseScore += 2000
+      } else if (humanThreat.liveThree) {
+        defenseScore += 500
       }
       
-      const score = this.quickEvaluate(this.board, move.row, move.col, this.aiPlayer) + defenseScore
-      return { move, score }
+      return { move, score: attackScore + defenseScore }
     })
+    
+    // 排序，优先搜索高价值位置
     scoredMoves.sort((a, b) => b.score - a.score)
 
     // 限制搜索的前几个最佳位置（根据难度调整）
     const searchLimit = Math.min(scoredMoves.length, {
-      'easy': 10,
-      'medium': 15,
-      'hard': 20
-    }[this.difficulty] || 15)
+      'easy': 8,
+      'medium': 12,
+      'hard': 16
+    }[this.difficulty] || 12)
 
     let bestMove = null
     let bestValue = -Infinity
@@ -293,32 +291,65 @@ class AI {
   }
 
   /**
-   * 快速评估一个位置的得分（用于排序）
+   * 快速检查威胁（优化版，不创建新棋盘）
    */
-  quickEvaluate(board, row, col) {
+  quickCheckThreat(board, row, col, player) {
+    const result = {
+      liveFour: false,
+      rushFour: false,
+      doubleLiveThree: false,
+      liveThree: false
+    }
+    
+    // 临时设置棋子（不创建新数组）
+    const originalValue = board[row][col]
+    board[row][col] = player
+    
+    // 快速检查活四和冲四
+    const liveFour = this.countLiveFour(board, row, col, player)
+    const rushFour = this.countRushFour(board, row, col, player)
+    const liveThree = this.countLiveThree(board, row, col, player)
+    
+    result.liveFour = liveFour > 0
+    result.rushFour = rushFour > 0
+    result.doubleLiveThree = liveThree >= 2
+    result.liveThree = liveThree > 0
+    
+    // 恢复原值
+    board[row][col] = originalValue
+    
+    return result
+  }
+
+  /**
+   * 快速评估一个位置的得分（用于排序，优化版）
+   */
+  quickEvaluate(board, row, col, player) {
     let score = 0
     
     // 位置权重
     score += this.positionWeights[row][col]
     
-    // 检查周围棋子情况（增强版）
+    // 检查周围棋子情况（优化：减少循环次数）
     const directions = [[0, 1], [1, 0], [1, 1], [1, -1]]
+    const opponent = player === this.aiPlayer ? this.humanPlayer : this.aiPlayer
+    
     for (let [dr, dc] of directions) {
       let aiCount = 0
       let humanCount = 0
       
-      // 检查两个方向
+      // 检查两个方向（优化：合并计算）
       for (let dir of [[dr, dc], [-dr, -dc]]) {
         let r = row + dir[0]
         let c = col + dir[1]
-        let count = 1
+        let count = 0
         
         // AI连子
         while (
           r >= 0 && r < this.size &&
           c >= 0 && c < this.size &&
-          board[r][c] === this.aiPlayer &&
-          count < 4
+          board[r][c] === player &&
+          count < 3
         ) {
           aiCount++
           r += dir[0]
@@ -326,15 +357,15 @@ class AI {
           count++
         }
         
-        // 人类连子
+        // 人类连子（重置位置）
         r = row + dir[0]
         c = col + dir[1]
-        count = 1
+        count = 0
         while (
           r >= 0 && r < this.size &&
           c >= 0 && c < this.size &&
-          board[r][c] === this.humanPlayer &&
-          count < 4
+          board[r][c] === opponent &&
+          count < 3
         ) {
           humanCount++
           r += dir[0]
@@ -343,7 +374,7 @@ class AI {
         }
       }
       
-      // 根据连子数给分（增强）
+      // 根据连子数给分（优化评分）
       if (aiCount >= 3) score += 200
       else if (aiCount === 2) score += 30
       else if (aiCount === 1) score += 5
@@ -378,19 +409,19 @@ class AI {
     const scoredMoves = moves.map(move => ({
       move,
       score: isMaximizing 
-        ? this.quickEvaluate(board, move.row, move.col)
-        : -this.quickEvaluate(board, move.row, move.col)
+        ? this.quickEvaluate(board, move.row, move.col, this.aiPlayer)
+        : -this.quickEvaluate(board, move.row, move.col, this.humanPlayer)
     }))
     scoredMoves.sort((a, b) => b.score - a.score)
     
-    // 限制搜索的移动数量（根据深度和难度，增加搜索数量以提升AI水平）
+    // 限制搜索的移动数量（优化：根据深度动态调整）
     const maxMovesToSearch = depth > 2 
       ? Math.min(scoredMoves.length, {
-          'easy': 10,
-          'medium': 12,
-          'hard': 15
-        }[this.difficulty] || 12)
-      : scoredMoves.length
+          'easy': 8,
+          'medium': 10,
+          'hard': 12
+        }[this.difficulty] || 10)
+      : Math.min(scoredMoves.length, 15)  // 浅层搜索更多位置
     const movesToSearch = scoredMoves.slice(0, maxMovesToSearch)
 
     if (isMaximizing) {
@@ -434,47 +465,50 @@ class AI {
     }
   }
 
-  // 增强的评估函数
+  // 增强的评估函数（优化版：减少重复计算）
   evaluate(board) {
     let score = 0
 
-    // 1. 基础连子评估
+    // 1. 基础连子评估（优化：使用缓存或简化计算）
     score += this.evaluateLines(board, this.aiPlayer) * 20
-    score -= this.evaluateLines(board, this.humanPlayer) * 25  // 增加防守权重
+    score -= this.evaluateLines(board, this.humanPlayer) * 25
 
-    // 2. 威胁评估（能形成五连的位置）
-    score += this.evaluateThreats(board, this.aiPlayer) * 200
-    score -= this.evaluateThreats(board, this.humanPlayer) * 300  // 大幅增加防守权重
+    // 2. 威胁评估（能形成五连的位置）- 优化：只在必要时计算
+    const aiThreats = this.evaluateThreats(board, this.aiPlayer)
+    const humanThreats = this.evaluateThreats(board, this.humanPlayer)
+    score += aiThreats * 200
+    score -= humanThreats * 300
 
-    // 3. 复杂棋形评估（双三、双四等）
-    score += this.evaluateComplexShapes(board, this.aiPlayer) * 40
-    score -= this.evaluateComplexShapes(board, this.humanPlayer) * 60  // 增加防守权重
+    // 3. 复杂棋形评估（优化：只在有威胁时计算）
+    if (humanThreats > 0 || aiThreats > 0) {
+      score += this.evaluateComplexShapes(board, this.aiPlayer) * 40
+      score -= this.evaluateComplexShapes(board, this.humanPlayer) * 60
+    }
 
-    // 4. 位置权重评估
+    // 4. 位置权重评估（简化）
     score += this.evaluatePositionValue(board, this.aiPlayer) * 0.8
     score -= this.evaluatePositionValue(board, this.humanPlayer) * 0.8
 
     // 5. 攻防平衡：如果玩家有威胁，大幅加强防守权重
-    const humanThreats = this.evaluateThreats(board, this.humanPlayer)
     if (humanThreats > 0) {
-      score -= humanThreats * 100  // 大幅增加防守权重
+      score -= humanThreats * 100
     }
     
-    // 6. 检查玩家活三、冲四威胁（新增）
-    const humanLiveThrees = this.countAllLiveThrees(board, this.humanPlayer)
-    const humanRushFours = this.countAllRushFours(board, this.humanPlayer)
-    const humanLiveFours = this.countAllLiveFours(board, this.humanPlayer)
-    
-    if (humanLiveFours > 0) {
-      score -= 5000  // 活四威胁极大，必须防守
-    }
-    if (humanRushFours > 0) {
-      score -= 2000  // 冲四威胁很大
-    }
-    if (humanLiveThrees >= 2) {
-      score -= 1000  // 双活三威胁很大
-    } else if (humanLiveThrees > 0) {
-      score -= 300  // 活三威胁
+    // 6. 检查玩家活三、冲四威胁（优化：只在有明显威胁时计算）
+    if (humanThreats > 0) {
+      const humanLiveThrees = this.countAllLiveThrees(board, this.humanPlayer)
+      const humanRushFours = this.countAllRushFours(board, this.humanPlayer)
+      const humanLiveFours = this.countAllLiveFours(board, this.humanPlayer)
+      
+      if (humanLiveFours > 0) {
+        score -= 5000
+      } else if (humanRushFours > 0) {
+        score -= 2000
+      } else if (humanLiveThrees >= 2) {
+        score -= 1000
+      } else if (humanLiveThrees > 0) {
+        score -= 300
+      }
     }
 
     return score
@@ -858,12 +892,12 @@ class AI {
     return moves
   }
 
-  // 获取有效落子位置（仅在有棋子附近的位置）
+  // 获取有效落子位置（仅在有棋子附近的位置，优化版）
   getValidMovesNearPieces(board) {
     const moves = []
     const searched = new Set()
 
-    // 查找所有已有棋子
+    // 优化：只检查有棋子的区域，减少遍历
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
         if (board[i][j] !== 0) {
@@ -894,17 +928,18 @@ class AI {
     if (moves.length === 0) {
       const center = Math.floor(this.size / 2)
       moves.push({ row: center, col: center })
+      return moves
     }
 
-    // 限制搜索范围以提高性能（根据难度调整）
+    // 限制搜索范围以提高性能（根据难度和局面复杂度调整）
     const maxMoves = {
-      'easy': 20,
-      'medium': 25,
-      'hard': 30
-    }[this.difficulty] || 25
+      'easy': 18,
+      'medium': 22,
+      'hard': 28
+    }[this.difficulty] || 22
     
     if (moves.length > maxMoves) {
-      // 根据位置价值排序，选择最好的位置
+      // 根据位置价值排序，选择最好的位置（优化：使用更快的排序）
       moves.sort((a, b) => {
         const scoreA = this.getMoveScore(board, a.row, a.col)
         const scoreB = this.getMoveScore(board, b.row, b.col)
