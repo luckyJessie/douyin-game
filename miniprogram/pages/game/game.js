@@ -112,6 +112,13 @@ Page({
       message: this.data.isOnlineMode ? '请创建或加入在线房间' : (this.data.playerFirst ? '玩家先手，请落子' : 'AI先手，AI 正在落子...')
     });
 
+    if (this.data.isOnlineMode) {
+      const db = await this.ensureDatabase();
+      if (!db) {
+        this.handleCloudUnavailable({ notify: true });
+      }
+    }
+
     await this.resetGame();
   },
 
@@ -727,8 +734,17 @@ Page({
 
   async ensureDatabase() {
     if (!wx.cloud) {
-      wx.showToast({ title: '请使用基础库 2.2.3 以上版本', icon: 'none' });
-      this.setData({ onlineMessage: '当前基础库不支持云开发功能' });
+      this.handleCloudUnavailable({
+        notify: true,
+        message: '当前基础库不支持云开发功能'
+      });
+      return null;
+    }
+    if (!CLOUD_ENV_ID) {
+      this.handleCloudUnavailable({
+        notify: true,
+        message: '未配置云开发环境，已切换至本地模式'
+      });
       return null;
     }
     if (!this.db) {
@@ -740,7 +756,10 @@ Page({
         this.db = wx.cloud.database();
       } catch (error) {
         console.error('init cloud error', error);
-        this.setData({ onlineMessage: '云开发初始化失败，请检查配置' });
+        this.handleCloudUnavailable({
+          notify: true,
+          message: '云开发初始化失败，请检查配置'
+        });
         return null;
       }
     }
@@ -766,6 +785,34 @@ Page({
         actionText: actionText || defaultAction
       }
     });
+  },
+
+  handleCloudUnavailable({ notify = false, message } = {}) {
+    if (notify) {
+      wx.showToast({
+        title: message || '云开发不可用，已切换至本地模式',
+        icon: 'none'
+      });
+    }
+    if (!this.data.isOnlineMode) {
+      return;
+    }
+    this.teardownWatcher();
+    this.onlineDocId = null;
+    this.setData({
+      isOnlineMode: false,
+      onlineRoomId: '',
+      onlineLoading: false,
+      onlineOpponentReady: false,
+      onlineCanAct: false,
+      joinRoomCode: '',
+      winToast: { visible: false, variant: 'player', title: '', message: '', actionText: '再来一局' },
+      message: '云开发不可用，已自动切换至本地人机模式',
+      onlineMessage: message || '云开发不可用，已切换至本地模式'
+    });
+    if (!this.data.isPlayerTurn) {
+      this.setData({ isPlayerTurn: true });
+    }
   }
 });
 
