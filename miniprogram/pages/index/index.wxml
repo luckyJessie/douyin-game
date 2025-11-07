@@ -1,0 +1,25 @@
+<view class="container">
+  <view class="header">
+    <text class="title">豆芽五子棋</text>
+    <text class="subtitle">{{statusMessage}}</text>
+  </view>
+  <canvas
+    id="boardCanvas"
+    type="2d"
+    class="board-canvas"
+    canvas-id="boardCanvas"
+    bindtouchstart="handleTouchStart"
+    disable-scroll="true"
+  ></canvas>
+  <view class="panel">
+    <view class="info-row">
+      <text>执子：{{isHumanTurn ? '玩家（黑）' : 'AI（白）'}}</text>
+      <text>落子数：{{moveCount}}</text>
+    </view>
+    <view class="button-row">
+      <button size="mini" bindtap="resetGame">重新开局</button>
+      <button size="mini" bindtap="switchFirstPlayer">切换先手</button>
+      <button size="mini" open-type="share">分享棋局</button>
+    </view>
+  </view>
+</view>

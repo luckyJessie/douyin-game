@@ -1,0 +1,21 @@
+{
+  "description": "豆芽五子棋微信小程序",
+  "packOptions": {
+    "ignore": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "coverView": true,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "nodeModules": false,
+    "enhance": true
+  },
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "bean-sprout-gomoku",
+  "libVersion": "3.5.5",
+  "condition": {}
+}
