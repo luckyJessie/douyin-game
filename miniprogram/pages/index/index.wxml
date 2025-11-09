@@ -10,7 +10,6 @@
             <text class="player-role">黑棋</text>
           </view>
         </view>
-        <text wx:if="{{currentTurn === humanRoleConstant}}" class="player-turn">落子中</text>
       </view>
       <view class="vs-tag">VS</view>
       <view class="player-card {{currentTurn === aiRoleConstant ? 'active' : ''}}">
@@ -21,7 +20,6 @@
             <text class="player-role">白棋</text>
           </view>
         </view>
-        <text wx:if="{{currentTurn === aiRoleConstant}}" class="player-turn">思考中</text>
       </view>
     </view>
     <text class="status">{{statusText}}</text>

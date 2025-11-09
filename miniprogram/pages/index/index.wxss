@@ -88,16 +88,6 @@
   border-color: rgba(0, 0, 0, 0.2);
 }
 
-.player-turn {
-  margin-top: 12rpx;
-  padding: 6rpx 18rpx;
-  border-radius: 20rpx;
-  font-size: 24rpx;
-  letter-spacing: 2rpx;
-  background: rgba(255, 226, 109, 0.2);
-  color: #ffe26d;
-}
-
 .vs-tag {
   margin: 0 24rpx;
   font-size: 32rpx;

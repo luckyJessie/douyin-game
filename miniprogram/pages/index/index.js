@@ -46,7 +46,6 @@ Page({
     steps: [],
     canvasPixelSize: 320,
     canvasDisplaySize: 320,
-    currentTurn: HUMAN_ROLE,
     resultMessage: '',
     resultType: '',
     resultAnimation: '',
@@ -71,9 +70,8 @@ Page({
 
     this.setData({
       canvasDisplaySize: displaySize,
-      canvasPixelSize,
-      currentTurn: this.humanRole,
-      statusText: '你先手，请落子'
+        canvasPixelSize,
+        statusText: '你先手，请落子'
     });
     this.initAudio();
   },
@@ -254,8 +252,7 @@ Page({
     this.currentRole = this.aiRole;
     this.setData({
       statusText: '电脑思考中...',
-      aiThinking: true,
-      currentTurn: this.aiRole
+      aiThinking: true
     });
     this.deferAiMove();
   },
@@ -299,8 +296,7 @@ Page({
     this.currentRole = this.humanRole;
     this.setData({
       statusText: '轮到你了',
-      aiThinking: false,
-      currentTurn: this.humanRole
+      aiThinking: false
     });
   },
 
@@ -382,17 +378,16 @@ Page({
       this.board[second.x][second.y] = 0;
     }
     this.currentRole = this.humanRole;
-    this.setData({
-      steps: this.stepsStack.slice(),
-      canUndo: this.stepsStack.length > 0,
-      aiThinking: false,
-      statusText: '轮到你了',
-      gameOver: false,
-      currentTurn: this.humanRole,
-      resultMessage: '',
-      resultType: '',
-      resultAnimation: ''
-    });
+      this.setData({
+        steps: this.stepsStack.slice(),
+        canUndo: this.stepsStack.length > 0,
+        aiThinking: false,
+        statusText: '轮到你了',
+        gameOver: false,
+        resultMessage: '',
+        resultType: '',
+        resultAnimation: ''
+      });
     this.renderBoard();
   },
 
@@ -542,15 +537,14 @@ Page({
   triggerResult({ type, status, message }) {
     const animation = RESULT_ANIMATIONS[type] || '';
     this.pauseBackgroundMusic();
-    this.setData({
-      statusText: status,
-      gameOver: true,
-      aiThinking: false,
-      currentTurn: 0,
-      resultMessage: message,
-      resultType: type,
-      resultAnimation: animation
-    });
+      this.setData({
+        statusText: status,
+        gameOver: true,
+        aiThinking: false,
+        resultMessage: message,
+        resultType: type,
+        resultAnimation: animation
+      });
     if (type === 'win') {
       this.playWinSound();
     } else if (type === 'lose') {
