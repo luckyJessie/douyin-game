@@ -338,6 +338,7 @@
 
 .btn-label {
   font-size: 28rpx;
+  color: #ffffff;
 }
 
 .difficulty {
