@@ -1,7 +1,7 @@
 {
   "miniprogramRoot": "miniprogram/",
-  "projectname": "bean-sprout-gomoku",
-  "description": "豆芽五子棋微信小程序",
+  "projectname": "五子棋",
+  "description": "五子棋微信小程序",
   "appid": "touristappid",
   "compileType": "miniprogram",
   "setting": {

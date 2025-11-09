@@ -252,7 +252,8 @@ Page({
     this.currentRole = this.aiRole;
     this.setData({
       statusText: '电脑思考中...',
-      aiThinking: true
+      aiThinking: true,
+      currentTurn: this.aiRole
     });
     this.deferAiMove();
   },
@@ -296,7 +297,8 @@ Page({
     this.currentRole = this.humanRole;
     this.setData({
       statusText: '轮到你了',
-      aiThinking: false
+      aiThinking: false,
+      currentTurn: this.humanRole
     });
   },
 
@@ -384,6 +386,7 @@ Page({
         aiThinking: false,
         statusText: '轮到你了',
         gameOver: false,
+        currentTurn: this.humanRole,
         resultMessage: '',
         resultType: '',
         resultAnimation: ''

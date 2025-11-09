@@ -1,6 +1,6 @@
 // app.js
 App({
   onLaunch() {
-    console.log('豆芽五子棋小程序启动');
+    console.log('五子棋小程序启动');
   }
 });
